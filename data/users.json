@@ -1,0 +1,35 @@
+[
+  {
+    "id": "usr_sample_1",
+    "name": "ವಿನಯ್ ಕುಮಾರ್",
+    "email": "vinay.kumar@example.com",
+    "grade": "10",
+    "role": "student",
+    "passwordHash": "62b251ce27a0e28f323a6f1d9d97bf27d2c3e1e247b973dc1e2a05cf5b3e215037d45f3408a65c269894e3e3b3d1b4231b54a26f30a996773238ca7bb0d6cfcf",
+    "salt": "e7b1a2c3d4e5f60718293a4b5c6d7e8f",
+    "registeredAt": "2026-10-02T03:01:20.892Z",
+    "lastLoginAt": "2026-10-05T01:01:20.892Z"
+  },
+  {
+    "id": "usr_sample_2",
+    "name": "ಅನನ್ಯ ಭಟ್",
+    "email": "ananya.bhat@example.com",
+    "grade": "10",
+    "role": "student",
+    "passwordHash": "62b251ce27a0e28f323a6f1d9d97bf27d2c3e1e247b973dc1e2a05cf5b3e215037d45f3408a65c269894e3e3b3d1b4231b54a26f30a996773238ca7bb0d6cfcf",
+    "salt": "e7b1a2c3d4e5f60718293a4b5c6d7e8f",
+    "registeredAt": "2026-10-03T03:01:20.892Z",
+    "lastLoginAt": "2026-10-04T22:01:20.892Z"
+  },
+  {
+    "id": "usr_sample_3",
+    "name": "ಪ್ರಶಾಂತ್ ಗೌಡ",
+    "email": "prashanth.gowda@example.com",
+    "grade": "9",
+    "role": "student",
+    "passwordHash": "62b251ce27a0e28f323a6f1d9d97bf27d2c3e1e247b973dc1e2a05cf5b3e215037d45f3408a65c269894e3e3b3d1b4231b54a26f30a996773238ca7bb0d6cfcf",
+    "salt": "e7b1a2c3d4e5f60718293a4b5c6d7e8f",
+    "registeredAt": "2026-10-04T03:01:20.892Z",
+    "lastLoginAt": "2026-10-05T03:01:20.892Z"
+  }
+]
