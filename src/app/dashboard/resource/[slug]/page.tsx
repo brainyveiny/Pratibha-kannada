@@ -1,27 +1,133 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { KANNADA_RESOURCES } from '@/data/resources';
+import { cache } from 'react';
+import { KANNADA_RESOURCES, type ResourceItem } from '@/data/resources';
 
 interface ResourcePageProps {
   params: Promise<{ slug: string }>;
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Unified resource resolver:
+ * 1. Checks fast static catalog first.
+ * 2. If not found, validates UUID format before querying Supabase.
+ * 3. Enforces is_published = true for public access.
+ * 4. Memoized with React cache() to avoid duplicate queries between generateMetadata and Page.
+ */
+const getResource = cache(async (slug: string): Promise<ResourceItem | null> => {
+  // 1. Static resources check first
+  const staticItem = KANNADA_RESOURCES.find((r) => r.slug === slug || r.id === slug);
+  if (staticItem) {
+    return staticItem;
+  }
+
+  // 2. Validate UUID format before querying Supabase
+  if (!UUID_REGEX.test(slug)) {
+    return null;
+  }
+
+  // 3. Check Supabase environment availability
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return null;
+  }
+
+  try {
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+
+    const { data: db, error } = await supabase
+      .from('resources')
+      .select(`
+        id,
+        title,
+        title_kn,
+        description,
+        resource_type,
+        file_url,
+        year,
+        is_published,
+        topics (
+          name,
+          categories (
+            slug,
+            subjects (
+              classes (
+                slug
+              )
+            )
+          )
+        )
+      `)
+      .eq('id', slug)
+      .eq('is_published', true)
+      .maybeSingle();
+
+    if (error) {
+      console.error('[ResourceResolver] Supabase query error for slug:', slug, error.message);
+      throw new Error('Database error resolving resource');
+    }
+
+    if (!db) {
+      return null;
+    }
+
+    const rawDb: any = db;
+    const topicData = Array.isArray(rawDb.topics) ? rawDb.topics[0] : rawDb.topics;
+    const catData = Array.isArray(topicData?.categories) ? topicData?.categories[0] : topicData?.categories;
+    const subData = Array.isArray(catData?.subjects) ? catData?.subjects[0] : catData?.subjects;
+    const clsData = Array.isArray(subData?.classes) ? subData?.classes[0] : subData?.classes;
+
+    const clsSlug = (clsData?.slug || '').replace('class-', '');
+    const catSlug = (catData?.slug || 'notes') as ResourceItem['category'];
+    const topicName = topicData?.name || 'ಸಾಮಾನ್ಯ';
+    const cleanContent = rawDb.description || '';
+    const cleanSummary = cleanContent.length > 200 ? cleanContent.slice(0, 200) + '...' : cleanContent || (rawDb.title_kn || rawDb.title);
+
+    return {
+      id: rawDb.id,
+      slug: rawDb.id,
+      title: rawDb.title_kn || rawDb.title || 'ಶೀರ್ಷಿಕೆ ಇಲ್ಲ',
+      classGrade: (clsSlug || '10') as ResourceItem['classGrade'],
+      category: catSlug,
+      topic: topicName,
+      summary: cleanSummary,
+      content: cleanContent,
+      pdfUrl: rawDb.file_url || undefined,
+      year: rawDb.year ? String(rawDb.year) : undefined,
+      tags: [rawDb.resource_type, catSlug].filter(Boolean),
+    };
+  } catch (err: any) {
+    // Re-throw genuine database/server errors to be handled as 500, rather than misreporting as 404
+    if (err.message === 'Database error resolving resource') {
+      throw err;
+    }
+    console.error('[ResourceResolver] Unexpected resolution error:', err.message);
+    throw err;
+  }
+});
+
 export async function generateMetadata({ params }: ResourcePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const item = KANNADA_RESOURCES.find((r) => r.slug === slug);
-  if (!item) {
-    return { title: 'ಸಂಪನ್ಮೂಲ ಸಿಗಲಿಲ್ಲ — ಪ್ರತಿಭಾ ಕನ್ನಡ' };
+  try {
+    const item = await getResource(slug);
+    if (!item) {
+      return { title: 'ಸಂಪನ್ಮೂಲ ಸಿಗಲಿಲ್ಲ — ಪ್ರತಿಭಾ ಕನ್ನಡ' };
+    }
+    return {
+      title: `${item.title} — ಪ್ರತಿಭಾ ಕನ್ನಡ`,
+      description: item.summary,
+    };
+  } catch {
+    return { title: 'ದೋಷ — ಪ್ರತಿಭಾ ಕನ್ನಡ' };
   }
-  return {
-    title: `${item.title} — ಪ್ರತಿಭಾ ಕನ್ನಡ`,
-    description: item.summary,
-  };
 }
 
 export default async function ResourceDetailPage({ params }: ResourcePageProps) {
   const { slug } = await params;
-  const item = KANNADA_RESOURCES.find((r) => r.slug === slug);
+  const item = await getResource(slug);
 
   if (!item) {
     notFound();
@@ -98,7 +204,7 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
 
           {/* Content Body */}
           <div className="prose prose-slate max-w-none text-slate-800 leading-relaxed space-y-4">
-            {item.content.split('\n\n').map((block, idx) => {
+            {item.content.split('\n\n').map((block: string, idx: number) => {
               const trimmed = block.trim();
               if (trimmed.startsWith('# ')) {
                 return (
@@ -126,24 +232,24 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
                 const lines = trimmed.split('\n').filter(Boolean);
                 const headerLine = lines[0];
                 const dataLines = lines.slice(2);
-                const headers = headerLine.split('|').filter(Boolean).map(h => h.trim());
+                const headers = headerLine.split('|').filter(Boolean).map((h: string) => h.trim());
 
                 return (
                   <div key={idx} className="overflow-x-auto my-4">
                     <table className="min-w-full text-xs sm:text-sm border border-slate-200 rounded-xl overflow-hidden">
                       <thead className="bg-orange-50 text-orange-900 font-bold border-b border-slate-200">
                         <tr>
-                          {headers.map((h, i) => (
+                          {headers.map((h: string, i: number) => (
                             <th key={i} className="py-2.5 px-3 text-left">{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100 bg-white">
-                        {dataLines.map((row, rIdx) => {
-                          const cols = row.split('|').filter(Boolean).map(c => c.trim());
+                        {dataLines.map((row: string, rIdx: number) => {
+                          const cols = row.split('|').filter(Boolean).map((c: string) => c.trim());
                           return (
                             <tr key={rIdx} className="hover:bg-slate-50">
-                              {cols.map((col, cIdx) => (
+                              {cols.map((col: string, cIdx: number) => (
                                 <td key={cIdx} className="py-2 px-3 text-slate-700">{col}</td>
                               ))}
                             </tr>
@@ -166,19 +272,32 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
           {/* Action Row */}
           <div className="mt-10 pt-6 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
-              {item.tags.map((tag) => (
+              {item.tags.map((tag: string) => (
                 <span key={tag} className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full">
                   #{tag}
                 </span>
               ))}
             </div>
 
-            <Link
-              href="/dashboard"
-              className="btn-primary text-xs px-5 py-2.5"
-            >
-              ಇನ್ನಷ್ಟು ಸಂಪನ್ಮೂಲಗಳನ್ನು ಓದಿ →
-            </Link>
+            <div className="flex items-center gap-3">
+              {item.pdfUrl && /^(https?:\/\/|\/)/i.test(item.pdfUrl) && (
+                <a
+                  href={item.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-orange-600 text-white text-xs font-bold hover:bg-orange-700 transition shadow-xs"
+                >
+                  <span>ಡೌನ್‌ಲೋಡ್ (PDF)</span>
+                  <span>↓</span>
+                </a>
+              )}
+              <Link
+                href="/dashboard"
+                className="btn-primary text-xs px-5 py-2.5"
+              >
+                ಇನ್ನಷ್ಟು ಸಂಪನ್ಮೂಲಗಳನ್ನು ಓದಿ →
+              </Link>
+            </div>
           </div>
 
         </article>
