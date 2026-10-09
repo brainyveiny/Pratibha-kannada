@@ -39,3 +39,7 @@ Thumbs.db
 tsconfig.tsbuildinfo
 .agents/
 supabase/.temp/
+
+# User data (never track user records or credential hashes)
+data/users.json
+data/*.json

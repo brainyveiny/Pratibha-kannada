@@ -51,8 +51,62 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     }
   }
 
+  // Load dynamic published resources from Supabase
+  let allResources = [...KANNADA_RESOURCES];
+  if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    try {
+      const { createClient } = await import('@/lib/supabase/server');
+      const supabase = await createClient();
+      const { data: dbResources } = await supabase
+        .from('resources')
+        .select(`
+          id,
+          title,
+          title_kn,
+          description,
+          resource_type,
+          file_url,
+          is_published,
+          topics (
+            name,
+            categories (
+              slug,
+              subjects (
+                classes (
+                  slug
+                )
+              )
+            )
+          )
+        `)
+        .eq('is_published', true);
+
+      if (dbResources && dbResources.length > 0) {
+        const mapped: any[] = dbResources.map((db: any) => {
+          const clsSlug = (db.topics?.categories?.subjects?.classes?.slug || '').replace('class-', '');
+          const catSlug = db.topics?.categories?.slug || 'notes';
+          return {
+            id: db.id,
+            slug: db.id,
+            title: db.title_kn || db.title,
+            classGrade: (clsSlug || '10') as any,
+            category: (catSlug || 'notes') as any,
+            topic: db.topics?.name || 'ಸಾಮಾನ್ಯ',
+            summary: db.description || db.title,
+            content: db.description || db.title,
+            pdfUrl: db.file_url || undefined,
+            tags: [db.resource_type, catSlug],
+          };
+        });
+        allResources = [...mapped, ...KANNADA_RESOURCES];
+      }
+    } catch {
+      // Fallback cleanly to static
+    }
+  }
+
   // Filter resources
-  const filtered = KANNADA_RESOURCES.filter((res) => {
+  const filtered = allResources.filter((res) => {
     // Class filter
     if (activeClass && res.classGrade !== 'all' && res.classGrade !== activeClass) {
       return false;
