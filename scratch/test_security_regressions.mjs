@@ -1,6 +1,25 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const BASE = process.env.BASE_URL || 'http://localhost:3001';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const envPath = path.resolve(__dirname, '..', '.env.local');
+if (fs.existsSync(envPath)) {
+  const content = fs.readFileSync(envPath, 'utf8');
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx !== -1) {
+      const key = trimmed.slice(0, eqIdx).trim();
+      const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+      if (!process.env[key]) process.env[key] = val;
+    }
+  }
+}
+
+const BASE = process.env.BASE_URL || 'http://localhost:3000';
 const SESSION_SECRET =
   process.env.SESSION_SECRET ||
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
@@ -64,6 +83,53 @@ async function runRegressionSuite() {
     `Status ${emptyPwdRes.status}, error: ${emptyPwdData.error}`
   );
 
+  // Test 1b: Login UI renders specific error messages according to query param
+  console.log('\n--- 1b. Testing Login UI Error Message Mapping ---');
+  const missingPwdUiRes = await fetch(`${BASE}/login?error=missing_password`);
+  const missingPwdUiHtml = await missingPwdUiRes.text();
+  assert(
+    missingPwdUiRes.status === 200 && missingPwdUiHtml.includes('Password required'),
+    'Login page renders "Password required" alert for error=missing_password',
+    `Status ${missingPwdUiRes.status}`
+  );
+
+  const invalidCredsUiRes = await fetch(`${BASE}/login?error=invalid_credentials`);
+  const invalidCredsUiHtml = await invalidCredsUiRes.text();
+  assert(
+    invalidCredsUiRes.status === 200 && invalidCredsUiHtml.includes('Invalid email or password'),
+    'Login page renders "Invalid email or password" alert for error=invalid_credentials',
+    `Status ${invalidCredsUiRes.status}`
+  );
+
+  const adminReqUiRes = await fetch(`${BASE}/login?error=admin_required`);
+  const adminReqUiHtml = await adminReqUiRes.text();
+  assert(
+    adminReqUiRes.status === 200 && adminReqUiHtml.includes('Admin authorization required'),
+    'Login page renders "Admin authorization required" alert for error=admin_required',
+    `Status ${adminReqUiRes.status}`
+  );
+
+  const unknownErrUiRes = await fetch(`${BASE}/login?error=unexpected_error_code`);
+  const unknownErrUiHtml = await unknownErrUiRes.text();
+  assert(
+    unknownErrUiRes.status === 200 && unknownErrUiHtml.includes('Login failed'),
+    'Login page safely falls back to generic alert for unknown error query code',
+    `Status ${unknownErrUiRes.status}`
+  );
+
+  // Test 1c: Misleading password text removed and required attribute present
+  console.log('\n--- 1c. Testing Login UI Password Field Requirement ---');
+  const normalLoginUiRes = await fetch(`${BASE}/login`);
+  const normalLoginUiHtml = await normalLoginUiRes.text();
+  assert(
+    normalLoginUiRes.status === 200 &&
+      !normalLoginUiHtml.includes('ಪಾಸ್‌ವರ್ಡ್ ನೆನಪಿಲ್ಲದಿದ್ದರೂ ಇಮೇಲ್ ಮೂಲಕ ಮುಂದುವರಿಯಬಹುದು') &&
+      normalLoginUiHtml.includes('name="password"') &&
+      normalLoginUiHtml.includes('required'),
+    'Login page removes misleading optional password text and marks password required',
+    `Status ${normalLoginUiRes.status}`
+  );
+
   // Test 2: Wrong password rejection
   console.log('\n--- 2. Testing Wrong Password Rejection ---');
   const wrongPwdRes = await fetch(`${BASE}/api/auth/login`, {
@@ -97,6 +163,52 @@ async function runRegressionSuite() {
     correctPwdRes.status === 200 && correctPwdData.success === true && setCookie.includes('pratibha_user='),
     'Login succeeds with correct password and sets session cookie',
     `Status ${correctPwdRes.status}`
+  );
+
+  // Test 3b: Valid signed student session on dashboard
+  console.log('\n--- 3b. Testing Valid Signed Student Session on Dashboard ---');
+  const validStudentCookie = setCookie.split(';')[0];
+  const dashStudentRes = await fetch(`${BASE}/dashboard`, {
+    headers: { Cookie: validStudentCookie },
+  });
+  const dashStudentHtml = await dashStudentRes.text();
+  assert(
+    dashStudentRes.status === 200 &&
+      dashStudentHtml.includes('ಪರೀಕ್ಷಾರ್ಥಿ ವಿದ್ಯಾರ್ಥಿ') &&
+      dashStudentHtml.includes('ಲಾಗ್ ಔಟ್'),
+    'Dashboard correctly parses signed session and renders student profile name',
+    `Status ${dashStudentRes.status}`
+  );
+
+  // Test 3c: Tampered session on dashboard
+  console.log('\n--- 3c. Testing Tampered Session Rejection on Dashboard ---');
+  const tamperedDashToken = validStudentCookie.replace(/pratibha_user=([^;]+)/, (m, tok) => {
+    const parts = tok.split('.');
+    return `pratibha_user=${parts[0]}.invalid_signature`;
+  });
+  const tamperedDashRes = await fetch(`${BASE}/dashboard`, {
+    headers: { Cookie: tamperedDashToken },
+  });
+  const tamperedDashHtml = await tamperedDashRes.text();
+  assert(
+    tamperedDashRes.status === 200 &&
+      !tamperedDashHtml.includes('ಪರೀಕ್ಷಾರ್ಥಿ ವಿದ್ಯಾರ್ಥಿ') &&
+      !tamperedDashHtml.includes('ಲಾಗ್ ಔಟ್') &&
+      tamperedDashHtml.includes('ಲಾಗಿನ್'),
+    'Dashboard rejects tampered session token and preserves logged-out view',
+    `Status ${tamperedDashRes.status}`
+  );
+
+  // Test 3d: Logged-out (no cookie) request on dashboard
+  console.log('\n--- 3d. Testing Logged-Out Request on Dashboard ---');
+  const loggedOutDashRes = await fetch(`${BASE}/dashboard`);
+  const loggedOutDashHtml = await loggedOutDashRes.text();
+  assert(
+    loggedOutDashRes.status === 200 &&
+      !loggedOutDashHtml.includes('ಪರೀಕ್ಷಾರ್ಥಿ ವಿದ್ಯಾರ್ಥಿ') &&
+      loggedOutDashHtml.includes('ಲಾಗಿನ್'),
+    'Dashboard without cookies preserves default logged-out state',
+    `Status ${loggedOutDashRes.status}`
   );
 
   // Test 4: Forged student -> admin cookie rejection
@@ -175,6 +287,59 @@ async function runRegressionSuite() {
     `Status ${noAuthAdminRes.status}`
   );
 
+  // Test 7b: Valid configured ADMIN_SECRET is accepted
+  console.log('\n--- 7b. Testing Configured ADMIN_SECRET Bearer Token Authorization ---');
+  if (process.env.ADMIN_SECRET) {
+    const validBearerRes = await fetch(`${BASE}/api/admin/users`, {
+      headers: { Authorization: `Bearer ${process.env.ADMIN_SECRET}` },
+    });
+    const validBearerData = await validBearerRes.json();
+    assert(
+      validBearerRes.status === 200 && Array.isArray(validBearerData.users),
+      'Valid configured ADMIN_SECRET bearer token is accepted with 200',
+      `Status ${validBearerRes.status}`
+    );
+  } else {
+    console.log('[SKIP] ADMIN_SECRET not configured in test environment for Test 7b');
+  }
+
+  // Test 7c: Incorrect bearer token is rejected
+  console.log('\n--- 7c. Testing Incorrect Bearer Token Rejection ---');
+  const incorrectBearerRes = await fetch(`${BASE}/api/admin/users`, {
+    headers: { Authorization: 'Bearer invalid_wrong_admin_token_xyz999' },
+  });
+  assert(
+    incorrectBearerRes.status === 403,
+    'Incorrect bearer token is rejected with 403',
+    `Status ${incorrectBearerRes.status}`
+  );
+
+  // Test 7d: Supabase service-role key rejected as bearer token
+  console.log('\n--- 7d. Testing Supabase Service-Role Key Rejection as Bearer Credential ---');
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const serviceKeyRes = await fetch(`${BASE}/api/admin/users`, {
+      headers: { Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+    });
+    assert(
+      serviceKeyRes.status === 403,
+      'Supabase service-role key is rejected as a bearer token even when configured in environment (403)',
+      `Status ${serviceKeyRes.status}`
+    );
+  }
+
+  // Test 7e: SESSION_SECRET rejected as bearer token
+  console.log('\n--- 7e. Testing SESSION_SECRET Rejection as Bearer Credential ---');
+  if (process.env.SESSION_SECRET) {
+    const sessionSecretRes = await fetch(`${BASE}/api/admin/users`, {
+      headers: { Authorization: `Bearer ${process.env.SESSION_SECRET}` },
+    });
+    assert(
+      sessionSecretRes.status === 403,
+      'SESSION_SECRET is rejected as a bearer token (no fallback) (403)',
+      `Status ${sessionSecretRes.status}`
+    );
+  }
+
   // Test 8: Unauthorized file upload request
   console.log('\n--- 8. Testing Unauthorized Upload Request ---');
   const formData = new FormData();
@@ -210,6 +375,46 @@ async function runRegressionSuite() {
     validAdminRes.status === 200 && Array.isArray(validAdminData.users),
     'Legitimate signed admin session succeeds with 200 and loads user list',
     `Status ${validAdminRes.status}`
+  );
+
+  // Test 9b: Unlisted email with role='admin' is rejected (ADMIN_EMAILS enforcement)
+  console.log('\n--- 9b. Testing Unlisted Admin Email Rejection ---');
+  const unlistedAdminToken = signSession({
+    id: 'usr_fake_admin',
+    name: 'ನಕಲಿ ನಿರ್ವಾಹಕ',
+    email: 'unlisted_admin@example.com',
+    role: 'admin',
+    expiresAt: Date.now() + 1000 * 60 * 60 * 24,
+  });
+  const unlistedAdminRes = await fetch(`${BASE}/api/admin/users`, {
+    headers: {
+      Cookie: `pratibha_user=${unlistedAdminToken}`,
+    },
+  });
+  assert(
+    unlistedAdminRes.status === 403,
+    'Session with role=admin but email not in ADMIN_EMAILS is strictly rejected with 403',
+    `Status ${unlistedAdminRes.status}`
+  );
+
+  // Test 9c: admin_pk_ registration does NOT get admin role
+  console.log('\n--- 9c. Testing admin_pk_ prefix does NOT elevate to admin ---');
+  const adminPkEmail = `admin_pk_${Date.now()}@example.com`;
+  const regAdminPkRes = await fetch(`${BASE}/api/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: BASE },
+    body: JSON.stringify({
+      display_name: 'ನಕಲಿ ಅಡ್ಮಿನ್',
+      email: adminPkEmail,
+      grade: '10',
+      password: 'StrongPassword@2026',
+    }),
+  });
+  const regAdminPkData = await regAdminPkRes.json();
+  assert(
+    regAdminPkRes.status === 200 && regAdminPkData.user?.role === 'student',
+    'Registration with admin_pk_ prefix is strictly assigned role: student',
+    `Role was ${regAdminPkData.user?.role}`
   );
 
   // Test 10: Legitimate admin upload succeeds

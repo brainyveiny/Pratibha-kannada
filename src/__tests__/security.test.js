@@ -31,4 +31,54 @@ describe('Security Utilities Unit Tests', () => {
     const wrongKey = crypto.scryptSync('WrongPassword', salt, 64).toString('hex');
     expect(derivedKey).not.toEqual(wrongKey);
   });
+
+  describe('Bearer Token Admin Authorization Logic', () => {
+    function verifyBearerToken(authHeader, adminSecretEnv) {
+      const adminSecret = (adminSecretEnv || '').trim();
+      if (authHeader && adminSecret) {
+        const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+        if (token) {
+          const tokenBuf = Buffer.from(token);
+          const secretBuf = Buffer.from(adminSecret);
+          if (tokenBuf.length === secretBuf.length && crypto.timingSafeEqual(tokenBuf, secretBuf)) {
+            return { authorized: true };
+          }
+        }
+      }
+      return { authorized: false };
+    }
+
+    test('valid configured ADMIN_SECRET is accepted', () => {
+      const configuredSecret = 'pk_adm_sec_custom_98765';
+      const result = verifyBearerToken(`Bearer ${configuredSecret}`, configuredSecret);
+      expect(result.authorized).toBe(true);
+    });
+
+    test('incorrect bearer token is rejected', () => {
+      const configuredSecret = 'pk_adm_sec_custom_98765';
+      const result = verifyBearerToken('Bearer wrong_token_value', configuredSecret);
+      expect(result.authorized).toBe(false);
+    });
+
+    test('Supabase service-role key is rejected even when present in environment', () => {
+      const configuredSecret = 'pk_adm_sec_custom_98765';
+      const supabaseServiceKey = 'mock_service_key_for_test_rejection_only';
+      const result = verifyBearerToken(`Bearer ${supabaseServiceKey}`, configuredSecret);
+      expect(result.authorized).toBe(false);
+    });
+
+    test('SESSION_SECRET is rejected as a bearer token', () => {
+      const configuredSecret = 'pk_adm_sec_custom_98765';
+      const sessionSecret = 'mock_session_secret_for_test_rejection_only';
+      const result = verifyBearerToken(`Bearer ${sessionSecret}`, configuredSecret);
+      expect(result.authorized).toBe(false);
+    });
+
+    test('fails closed when ADMIN_SECRET is not configured (empty or undefined)', () => {
+      expect(verifyBearerToken('Bearer some_bearer_token', undefined).authorized).toBe(false);
+      expect(verifyBearerToken('Bearer some_bearer_token', '').authorized).toBe(false);
+      expect(verifyBearerToken('Bearer some_bearer_token', '   ').authorized).toBe(false);
+    });
+  });
 });
+

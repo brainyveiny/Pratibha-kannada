@@ -38,4 +38,20 @@ Thumbs.db
 # Build cache & local agents
 tsconfig.tsbuildinfo
 .agents/
+.agent/
+.gemini/
+.gsd/
+GSD-STYLE.md
+PROJECT_RULES.md
+VERSION
+adapters/
+model_capabilities.yaml
+scratch/
+scripts/validate-*
+scripts/search_repo.*
+scripts/setup_search.*
 supabase/.temp/
+
+# User data (never track user records or credential hashes)
+data/users.json
+data/*.json

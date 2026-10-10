@@ -87,7 +87,7 @@ async function run() {
     'categories',
     'topics',
     'resources',
-    'resource_files',
+    'question_papers',
     'favorites',
     'recent_views',
   ];

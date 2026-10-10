@@ -35,21 +35,15 @@ export async function middleware(request: NextRequest) {
     if (sessionCookie) {
       const verification = await verifySessionTokenAsync(sessionCookie);
       if (verification.valid && verification.session) {
-        if (verification.session.role === 'admin') {
-          isAuthorized = true;
-        } else {
-          const adminEmails = (
-            process.env.ADMIN_EMAILS ||
-            'admin@pratibhakannada.org,vamshi@pratibhakannada.org'
-          )
+        const adminEmailsConfig = (process.env.ADMIN_EMAILS || '').trim();
+        if (adminEmailsConfig && verification.session.email) {
+          const adminEmails = adminEmailsConfig
             .toLowerCase()
             .split(',')
-            .map((e) => e.trim());
+            .map((e) => e.trim())
+            .filter(Boolean);
 
-          if (
-            verification.session.email &&
-            adminEmails.includes(verification.session.email.toLowerCase())
-          ) {
+          if (adminEmails.includes(verification.session.email.toLowerCase())) {
             isAuthorized = true;
           }
         }
