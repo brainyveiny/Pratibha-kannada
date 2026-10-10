@@ -415,15 +415,18 @@ export function verifyWebhookSignature(
 // 9. STRICT SERVER-SIDE ADMIN ACCESS VERIFICATION (NO BYPASSES)
 // ─────────────────────────────────────────────────────────────
 export function verifyAdminAccess(request: NextRequest): { authorized: boolean; reason?: string } {
-  // 1. Direct Bearer Authorization header (for machine/CI/automated admin access)
+  // 1. Direct Bearer Authorization header (only when dedicated ADMIN_SECRET is explicitly configured)
   const authHeader = request.headers.get('authorization');
-  const adminSecret =
-    process.env.ADMIN_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || SESSION_SECRET;
+  const adminSecret = (process.env.ADMIN_SECRET || '').trim();
 
   if (authHeader && adminSecret) {
     const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-    if (token === adminSecret) {
-      return { authorized: true };
+    if (token) {
+      const tokenBuf = Buffer.from(token);
+      const secretBuf = Buffer.from(adminSecret);
+      if (tokenBuf.length === secretBuf.length && crypto.timingSafeEqual(tokenBuf, secretBuf)) {
+        return { authorized: true };
+      }
     }
   }
 
@@ -435,19 +438,20 @@ export function verifyAdminAccess(request: NextRequest): { authorized: boolean; 
   if (sessionCookie) {
     const verification = verifySessionToken(sessionCookie);
     if (verification.valid && verification.session) {
-      // Must be explicitly signed as admin
-      if (verification.session.role === 'admin') {
-        return { authorized: true };
+      const adminEmailsConfig = (process.env.ADMIN_EMAILS || '').trim();
+      if (!adminEmailsConfig) {
+        // Missing ADMIN_EMAILS environment variable means NO admins exist (safe default)
+        return {
+          authorized: false,
+          reason: 'ನಿರ್ವಾಹಕರ ಸಂರಚನೆ ಲಭ್ಯವಿಲ್ಲ (ADMIN_EMAILS not configured)',
+        };
       }
 
-      // Check configured admin emails for allowed elevation
-      const adminEmails = (
-        process.env.ADMIN_EMAILS ||
-        'admin@pratibhakannada.org,vamshi@pratibhakannada.org'
-      )
+      const adminEmails = adminEmailsConfig
         .toLowerCase()
         .split(',')
-        .map((e) => e.trim());
+        .map((e) => e.trim())
+        .filter(Boolean);
 
       if (
         verification.session.email &&

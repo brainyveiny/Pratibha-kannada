@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { KANNADA_RESOURCES, type ResourceItem } from '@/data/resources';
+import { SearchModeToggle } from '@/components/search/SearchModeToggle';
 
 interface ResourcePageProps {
   params: Promise<{ slug: string }>;
@@ -151,8 +152,9 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
             <span>←</span>
             <span>ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="text-sm font-bold text-orange-600">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <SearchModeToggle />
+            <Link href="/dashboard" className="text-sm font-bold text-orange-600 hidden xs:inline-flex">
               ಪ್ರತಿಭಾ ಕನ್ನಡ
             </Link>
           </div>

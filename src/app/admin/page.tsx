@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifySessionToken } from '@/lib/security';
 import AdminContentManager from './AdminContentManager';
+import { SearchModeToggle } from '@/components/search/SearchModeToggle';
 
 export const metadata: Metadata = {
   title: 'ನಿರ್ವಾಹಕ ಕಂಟೆಂಟ್ ಕಂಟ್ರೋಲ್ ಸೆಂಟರ್ (Admin CMS) | Pratibha Kannada',
@@ -20,20 +21,22 @@ export default async function AdminPage() {
     cookieStore.get('pratibha_session')?.value;
 
   const verification = verifySessionToken(sessionToken);
-  const adminEmails = (
-    process.env.ADMIN_EMAILS ||
-    'admin@pratibhakannada.org,vamshi@pratibhakannada.org'
-  )
-    .toLowerCase()
-    .split(',')
-    .map((e) => e.trim());
+  const adminEmailsConfig = (process.env.ADMIN_EMAILS || '').trim();
+  const adminEmails = adminEmailsConfig
+    ? adminEmailsConfig
+        .toLowerCase()
+        .split(',')
+        .map((e) => e.trim())
+        .filter(Boolean)
+    : [];
 
-  const isAdmin =
+  const isAdmin = Boolean(
     verification.valid &&
-    verification.session &&
-    (verification.session.role === 'admin' ||
-      (verification.session.email &&
-        adminEmails.includes(verification.session.email.toLowerCase())));
+      verification.session &&
+      verification.session.email &&
+      adminEmails.length > 0 &&
+      adminEmails.includes(verification.session.email.toLowerCase())
+  );
 
   if (!isAdmin) {
     redirect('/login?error=admin_required');
@@ -55,12 +58,13 @@ export default async function AdminPage() {
               Admin CMS
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <SearchModeToggle />
             <Link
               href="/dashboard"
-              className="text-xs text-slate-600 hover:text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl transition hover:bg-slate-50 kn font-medium flex items-center gap-1.5"
+              className="text-xs text-slate-600 hover:text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl transition hover:bg-slate-50 kn font-medium hidden sm:flex items-center gap-1.5"
             >
-              <span>ವಿದ್ಯಾರ್ಥಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ವೀಕ್ಷಿಸಿ</span>
+              <span>ವಿದ್ಯಾರ್ಥಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್</span>
               <span>→</span>
             </Link>
           </div>

@@ -24,12 +24,13 @@ const USERS_FILE = path.join(DATA_DIR, 'users.json');
 // In-memory fallback cache for serverless environments where filesystem is read-only
 let inMemoryUsersCache: StoredUser[] | null = null;
 
-// Default seed password hash for initial demo accounts ('Pratibha@2026')
-const SEED_PASSWORD_HASH =
-  '62b251ce27a0e28f323a6f1d9d97bf27d2c3e1e247b973dc1e2a05cf5b3e215037d45f3408a65c269894e3e3b3d1b4231b54a26f30a996773238ca7bb0d6cfcf';
-const SEED_SALT = 'e7b1a2c3d4e5f60718293a4b5c6d7e8f';
-
 function getInitialSeedUsers(): StoredUser[] {
+  // In production, NEVER seed accounts or default passwords
+  if (process.env.NODE_ENV === 'production') {
+    return [];
+  }
+
+  // Sample student demo accounts for local development and offline unit tests only (NO admin accounts)
   return [
     {
       id: 'usr_sample_1',
@@ -37,8 +38,6 @@ function getInitialSeedUsers(): StoredUser[] {
       email: 'vinay.kumar@example.com',
       grade: '10',
       role: 'student',
-      passwordHash: SEED_PASSWORD_HASH,
-      salt: SEED_SALT,
       registeredAt: new Date(Date.now() - 86400000 * 3).toISOString(),
       lastLoginAt: new Date(Date.now() - 3600000 * 2).toISOString(),
     },
@@ -48,8 +47,6 @@ function getInitialSeedUsers(): StoredUser[] {
       email: 'ananya.bhat@example.com',
       grade: '10',
       role: 'student',
-      passwordHash: SEED_PASSWORD_HASH,
-      salt: SEED_SALT,
       registeredAt: new Date(Date.now() - 86400000 * 2).toISOString(),
       lastLoginAt: new Date(Date.now() - 3600000 * 5).toISOString(),
     },
@@ -59,20 +56,7 @@ function getInitialSeedUsers(): StoredUser[] {
       email: 'prashanth.gowda@example.com',
       grade: '9',
       role: 'student',
-      passwordHash: SEED_PASSWORD_HASH,
-      salt: SEED_SALT,
       registeredAt: new Date(Date.now() - 86400000).toISOString(),
-      lastLoginAt: new Date().toISOString(),
-    },
-    {
-      id: 'usr_admin_1',
-      name: 'ಮುಖ್ಯ ನಿರ್ವಾಹಕ',
-      email: 'admin@pratibhakannada.org',
-      grade: '10',
-      role: 'admin',
-      passwordHash: SEED_PASSWORD_HASH,
-      salt: SEED_SALT,
-      registeredAt: new Date(Date.now() - 86400000 * 10).toISOString(),
       lastLoginAt: new Date().toISOString(),
     },
   ];
@@ -105,23 +89,6 @@ function initStore(): StoredUser[] {
 
     const raw = fs.readFileSync(USERS_FILE, 'utf-8');
     const parsed: StoredUser[] = JSON.parse(raw);
-
-    // Ensure all seeded users have a passwordHash
-    let migrated = false;
-    for (const u of parsed) {
-      if (!u.passwordHash || !u.salt) {
-        u.passwordHash = SEED_PASSWORD_HASH;
-        u.salt = SEED_SALT;
-        migrated = true;
-      }
-    }
-    if (migrated) {
-      try {
-        fs.writeFileSync(USERS_FILE, JSON.stringify(parsed, null, 2), 'utf-8');
-      } catch {
-        // serverless ignore
-      }
-    }
 
     inMemoryUsersCache = parsed;
     return parsed;
@@ -188,16 +155,13 @@ export function recordUserRegistration(
   }
 
   const { hash, salt } = hashPassword(password);
-  const isAdminEmail =
-    normalizedEmail === 'admin@pratibhakannada.org' ||
-    normalizedEmail.startsWith('admin_pk_');
 
   const newUser: StoredUser = {
     id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     name: name || 'ವಿದ್ಯಾರ್ಥಿ',
     email: normalizedEmail,
     grade: grade || '10',
-    role: isAdminEmail ? 'admin' : 'student',
+    role: 'student', // All public registrations are strictly assigned student role.
     passwordHash: hash,
     salt,
     registeredAt: new Date().toISOString(),

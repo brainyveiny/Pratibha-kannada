@@ -22,7 +22,7 @@ if (fs.existsSync(envPath)) {
   }
 }
 
-const BASE = process.env.BASE_URL || 'http://localhost:3001';
+const BASE = process.env.BASE_URL || 'http://localhost:3000';
 const SESSION_SECRET =
   process.env.SESSION_SECRET ||
   process.env.SUPABASE_SERVICE_ROLE_KEY ||

@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { KANNADA_RESOURCES } from '@/data/resources';
+import { verifySessionToken } from '@/lib/security';
+import { SearchModeToggle } from '@/components/search/SearchModeToggle';
+import { matchResourceQuery, scoreResourceMatch, transliterateToKannada } from '@/lib/kannadaTransliteration';
+import { LiveSearchAutocomplete } from '@/components/search/LiveSearchAutocomplete';
 
 export const metadata: Metadata = {
   title: 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ — ಪ್ರತಿಭಾ ಕನ್ನಡ',
@@ -29,27 +33,31 @@ const CATEGORIES = [
 ];
 
 interface DashboardPageProps {
-  searchParams: Promise<{ q?: string; class?: string; cat?: string; welcome?: string }>;
+  searchParams: Promise<{ q?: string; class?: string; cat?: string; welcome?: string; mode?: string }>;
 }
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const params = await searchParams;
-  const query = (params.q ?? '').trim().toLowerCase();
+  const rawQuery = (params.q ?? '').trim();
+  const query = rawQuery.toLowerCase();
   const activeClass = params.class ?? '';
   const activeCat = params.cat ?? '';
 
-  // Read student session cookie
+  // Read and cryptographically verify student session cookie
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('pratibha_user');
-  let currentStudent: { name: string; email: string; grade?: string } | null = null;
-  if (sessionCookie?.value) {
-    try {
-      const decoded = Buffer.from(sessionCookie.value, 'base64').toString('utf-8');
-      currentStudent = JSON.parse(decoded);
-    } catch {
-      // ignore
-    }
-  }
+  const sessionToken = cookieStore.get('pratibha_user')?.value;
+  const verification = verifySessionToken(sessionToken);
+  const currentStudent = verification.valid && verification.session ? verification.session : null;
+
+  // Search mode: defaults to 'kn' (Kannada), activated to 'en' (English letters) via query param or persistent cookie
+  const cookieMode =
+    cookieStore.get('pratibha_language_mode')?.value ||
+    cookieStore.get('pratibha_search_mode')?.value;
+  const isEnRequested =
+    params.mode === 'en' ||
+    params.mode === 'english' ||
+    (!params.mode && (cookieMode === 'en' || cookieMode === 'english'));
+  const searchMode: 'kn' | 'en' = isEnRequested ? 'en' : 'kn';
 
   // Load dynamic published resources from Supabase
   let allResources = [...KANNADA_RESOURCES];
@@ -105,67 +113,85 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
     }
   }
 
-  // Filter resources
-  const filtered = allResources.filter((res) => {
-    // Class filter
-    if (activeClass && res.classGrade !== 'all' && res.classGrade !== activeClass) {
-      return false;
-    }
-    // Category filter
-    if (activeCat && res.category !== activeCat) {
-      return false;
-    }
-    // Search query filter
-    if (query) {
-      const matchTitle = res.title.toLowerCase().includes(query);
-      const matchSummary = res.summary.toLowerCase().includes(query);
-      const matchTopic = res.topic.toLowerCase().includes(query);
-      const matchTags = res.tags.some((t) => t.toLowerCase().includes(query));
-      if (!matchTitle && !matchSummary && !matchTopic && !matchTags) {
-        return false;
-      }
-    }
+  // Deduplicate resources by id and slug to ensure static and database resources never appear twice
+  const seenIds = new Set<string>();
+  const uniqueResources = allResources.filter((res) => {
+    const key = res.id || res.slug;
+    if (seenIds.has(key)) return false;
+    seenIds.add(key);
     return true;
   });
+
+  // Calculate transliteration candidates for search UI transparency
+  const transliteratedCandidates =
+    rawQuery && searchMode === 'en' ? transliterateToKannada(rawQuery) : [];
+
+  // Filter & rank resources by relevance score
+  const scoredResources = uniqueResources
+    .filter((res) => {
+      // Class filter
+      if (activeClass && res.classGrade !== 'all' && res.classGrade !== activeClass) {
+        return false;
+      }
+      // Category filter
+      if (activeCat && res.category !== activeCat) {
+        return false;
+      }
+      return true;
+    })
+    .map((res) => {
+      const score = query
+        ? scoreResourceMatch(
+            [
+              res.title,
+              res.topic,
+              res.summary,
+              ...(res.tags || []),
+              res.content,
+              res.authorOrSource,
+            ],
+            rawQuery,
+            searchMode
+          )
+        : 1;
+      return { res, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  const filtered = scoredResources.map(({ res }) => res);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-kannada">
 
       {/* ─── Sticky Header with search ─── */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          <Link href="/dashboard" className="text-xl font-extrabold text-orange-600 shrink-0">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sm:gap-4">
+          <Link href="/dashboard" className="text-lg sm:text-xl font-extrabold text-orange-600 shrink-0">
             ಪ್ರತಿಭಾ ಕನ್ನಡ
           </Link>
 
-          {/* Search bar */}
-          <form action="/dashboard" method="GET" className="flex-1 flex gap-2 max-w-xl" id="dash-search-form">
-            {activeClass && <input type="hidden" name="class" value={activeClass} />}
-            {activeCat && <input type="hidden" name="cat" value={activeCat} />}
-            <div className="relative flex-1">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-              </svg>
-              <input
-                id="dash-search-input"
-                name="q"
-                type="search"
-                defaultValue={params.q ?? ''}
-                placeholder="ಹುಡುಕಿ — ಸಂಧಿ, ಯುದ್ಧ, ಗಾದೆ, 2025 ಪೇಪರ್, ಕುವೆಂಪು..."
-                className="input pl-9 py-2 text-sm rounded-full w-full"
-                aria-label="ಸಂಪನ್ಮೂಲ ಹುಡುಕಿ"
-              />
-            </div>
-            <button type="submit" id="dash-search-btn" className="btn-primary text-sm px-5 shrink-0">
-              ಹುಡುಕಿ
-            </button>
-          </form>
+          {/* Search bar with Live Autocomplete */}
+          <div className="flex-1 max-w-xl">
+            <LiveSearchAutocomplete
+              variant="compact"
+              defaultValue={rawQuery}
+              activeClass={activeClass}
+              activeCat={activeCat}
+              formAction="/dashboard"
+              inputId="dash-search-input"
+              formId="dash-search-form"
+              buttonId="dash-search-btn"
+            />
+          </div>
 
-          {/* Student profile & Admin */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Top-Right Area: Search Mode Toggle, Admin, and Student Profile */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <SearchModeToggle initialMode={searchMode} showHelperBadge />
+
             <Link
               href="/admin"
-              className="text-xs text-slate-500 hover:text-orange-600 bg-slate-100 hover:bg-orange-50 px-2.5 py-1.5 rounded-lg font-medium transition"
+              className="text-xs text-slate-500 hover:text-orange-600 bg-slate-100 hover:bg-orange-50 px-2.5 py-1.5 rounded-lg font-medium transition hidden md:inline-flex"
               title="ಬಳಕೆದಾರರ ವರದಿ ಮತ್ತು ಅಂಕಿಅಂಶ"
             >
               ಬಳಕೆದಾರರ ಮಾಹಿತಿ
@@ -176,7 +202,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
                   {currentStudent.name.charAt(0).toUpperCase()}
                 </div>
-                <div className="hidden md:block text-left">
+                <div className="hidden lg:block text-left">
                   <div className="text-xs font-bold text-gray-800 leading-tight">
                     {currentStudent.name}
                   </div>
@@ -191,7 +217,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 </form>
               </div>
             ) : (
-              <Link href="/login" className="btn-outline text-xs px-3 py-1.5">
+              <Link href="/login" className="btn-outline text-xs px-3 py-1.5 hidden xs:inline-flex">
                 ಲಾಗಿನ್
               </Link>
             )}
@@ -220,14 +246,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">ತರಗತಿ ಆಯ್ಕೆಮಾಡಿ</h2>
             {activeClass && (
-              <Link href={activeCat ? `/dashboard?cat=${activeCat}` : '/dashboard'} className="text-xs text-orange-600 hover:underline">
+              <Link href={activeCat ? `/dashboard?cat=${activeCat}${searchMode === 'en' ? '&mode=en' : ''}` : searchMode === 'en' ? '/dashboard?mode=en' : '/dashboard'} className="text-xs text-orange-600 hover:underline">
                 ಎಲ್ಲಾ ತರಗತಿಗಳನ್ನು ತೋರಿಸಿ
               </Link>
             )}
           </div>
           <div className="flex flex-wrap gap-2" role="group" aria-label="ತರಗತಿ ಫಿಲ್ಟರ್">
             <Link
-              href={activeCat ? `/dashboard?cat=${activeCat}` : '/dashboard'}
+              href={activeCat ? `/dashboard?cat=${activeCat}${searchMode === 'en' ? '&mode=en' : ''}` : searchMode === 'en' ? '/dashboard?mode=en' : '/dashboard'}
               id="class-filter-all"
               className={`pill ${!activeClass ? 'pill-active' : 'pill-inactive'}`}
             >
@@ -236,7 +262,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             {CLASSES.map((c) => (
               <Link
                 key={c.slug}
-                href={`/dashboard?class=${c.slug}${activeCat ? `&cat=${activeCat}` : ''}`}
+                href={`/dashboard?class=${c.slug}${activeCat ? `&cat=${activeCat}` : ''}${searchMode === 'en' ? '&mode=en' : ''}`}
                 id={`class-filter-${c.slug}`}
                 className={`pill ${activeClass === c.slug ? 'pill-active' : 'pill-inactive'}`}
               >
@@ -251,7 +277,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">ವಿಷಯ ಪ್ರಕಾರ</h2>
             {activeCat && (
-              <Link href={activeClass ? `/dashboard?class=${activeClass}` : '/dashboard'} className="text-xs text-orange-600 hover:underline">
+              <Link href={activeClass ? `/dashboard?class=${activeClass}${searchMode === 'en' ? '&mode=en' : ''}` : searchMode === 'en' ? '/dashboard?mode=en' : '/dashboard'} className="text-xs text-orange-600 hover:underline">
                 ಎಲ್ಲಾ ಪ್ರಕಾರಗಳನ್ನು ತೋರಿಸಿ
               </Link>
             )}
@@ -262,7 +288,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               return (
                 <Link
                   key={cat.slug}
-                  href={`/dashboard?cat=${cat.slug}${activeClass ? `&class=${activeClass}` : ''}`}
+                  href={`/dashboard?cat=${cat.slug}${activeClass ? `&class=${activeClass}` : ''}${searchMode === 'en' ? '&mode=en' : ''}`}
                   id={`cat-${cat.slug}`}
                   className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3 group ${
                     isSelected
@@ -284,6 +310,28 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             })}
           </div>
         </section>
+
+        {/* Search transliteration mode indicator banner */}
+        {rawQuery && searchMode === 'en' && transliteratedCandidates.length > 0 && (
+          <div className="mb-6 p-3.5 rounded-2xl bg-orange-50/90 border border-orange-200/80 text-xs text-orange-950 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-orange-800 inline-flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                English ಲಿಪಿ ಹುಡುಕಾಟ:
+              </span>
+              <span className="font-mono bg-white px-2.5 py-0.5 rounded-lg border border-orange-200 font-medium text-neutral-800">
+                &ldquo;{rawQuery}&rdquo;
+              </span>
+              <span className="text-neutral-400">➔</span>
+              <span className="font-bold text-neutral-900 kn">
+                {transliteratedCandidates.join(' / ')}
+              </span>
+            </div>
+            <span className="text-[11px] text-orange-700 font-medium">
+              ಮೂಲ ಕನ್ನಡ ಸಂಪನ್ಮೂಲಗಳನ್ನು ಹುಡುಕಲಾಗಿದೆ
+            </span>
+          </div>
+        )}
 
         {/* ─── Resources Listing Area ─── */}
         <section>

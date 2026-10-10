@@ -1,6 +1,25 @@
 import crypto from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const BASE = process.env.BASE_URL || 'http://localhost:3001';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const envPath = path.resolve(__dirname, '..', '.env.local');
+if (fs.existsSync(envPath)) {
+  const content = fs.readFileSync(envPath, 'utf8');
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx !== -1) {
+      const key = trimmed.slice(0, eqIdx).trim();
+      const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+      if (!process.env[key]) process.env[key] = val;
+    }
+  }
+}
+
+const BASE = process.env.BASE_URL || 'http://localhost:3000';
 const SESSION_SECRET =
   process.env.SESSION_SECRET ||
   process.env.SUPABASE_SERVICE_ROLE_KEY ||
@@ -251,11 +270,34 @@ async function runVerification() {
   });
   record('Admin', 'Legitimate admin accesses /api/admin/users (200)', legitAdminReq.status === 200, `Status: ${legitAdminReq.status}`);
 
-  // Bearer token admin access
-  const bearerReq = await fetch(`${BASE}/api/admin/users`, {
-    headers: { Authorization: `Bearer ${SESSION_SECRET}` },
+  // Bearer token admin access (only if dedicated ADMIN_SECRET is configured)
+  if (process.env.ADMIN_SECRET) {
+    const bearerReq = await fetch(`${BASE}/api/admin/users`, {
+      headers: { Authorization: `Bearer ${process.env.ADMIN_SECRET}` },
+    });
+    record('Admin', 'Legitimate Bearer token accesses /api/admin/users (200)', bearerReq.status === 200, `Status: ${bearerReq.status}`);
+  } else {
+    // When no dedicated ADMIN_SECRET is configured, verify untrusted bearer token is rejected (403)
+    const rejectBearerReq = await fetch(`${BASE}/api/admin/users`, {
+      headers: { Authorization: 'Bearer invalid_unconfigured_secret' },
+    });
+    record('Admin', 'Untrusted Bearer token is rejected when ADMIN_SECRET is not configured (403)', rejectBearerReq.status === 403, `Status: ${rejectBearerReq.status}`);
+  }
+
+  // Verify incorrect bearer token is rejected
+  const rejectWrongBearer = await fetch(`${BASE}/api/admin/users`, {
+    headers: { Authorization: 'Bearer incorrect_dummy_secret_value' },
   });
-  record('Admin', 'Legitimate Bearer token accesses /api/admin/users (200)', bearerReq.status === 200, `Status: ${bearerReq.status}`);
+  record('Admin', 'Incorrect Bearer token is rejected (403)', rejectWrongBearer.status === 403, `Status: ${rejectWrongBearer.status}`);
+
+  // Verify Supabase service-role key is never accepted as bearer credential
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const rejectServiceKey = await fetch(`${BASE}/api/admin/users`, {
+      headers: { Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+    });
+    record('Admin', 'Supabase service-role key rejected as Bearer token (403)', rejectServiceKey.status === 403, `Status: ${rejectServiceKey.status}`);
+  }
+
 
   console.log('\n===============================================================');
   const allPassed = results.every(r => r.passed);
