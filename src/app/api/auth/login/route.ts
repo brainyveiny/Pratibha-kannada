@@ -99,22 +99,30 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Validate whether authenticated user matches server-configured ADMIN_EMAILS
+  const adminEmailsConfig = (process.env.ADMIN_EMAILS || '').trim();
+  const adminEmails = adminEmailsConfig
+    ? adminEmailsConfig.toLowerCase().split(',').map((e) => e.trim()).filter(Boolean)
+    : [];
+  const isAdmin = Boolean(user.email && adminEmails.includes(user.email.toLowerCase()));
+
   // Create cryptographically signed session token
   const sessionData: SessionUser = {
     id: user.id,
     name: user.name,
     email: user.email,
     grade: user.grade,
-    role: (user.role as 'student' | 'admin') || 'student',
+    role: isAdmin ? 'admin' : 'student',
     loggedInAt: new Date().toISOString(),
     expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 30, // 30 days
   };
 
   const signedToken = signSessionToken(sessionData);
 
+  const responseUser = { ...user, role: isAdmin ? 'admin' : 'student' };
   const response = isJson
-    ? NextResponse.json({ success: true, user })
-    : NextResponse.redirect(new URL('/dashboard', request.url), 303);
+    ? NextResponse.json({ success: true, user: responseUser })
+    : NextResponse.redirect(new URL(isAdmin ? '/admin' : '/dashboard', request.url), 303);
 
   // Set cryptographically signed HTTP-Only session cookies
   const cookieOptions = {

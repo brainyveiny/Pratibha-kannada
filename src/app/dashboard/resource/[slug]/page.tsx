@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 import { KANNADA_RESOURCES, type ResourceItem } from '@/data/resources';
 import { SearchModeToggle } from '@/components/search/SearchModeToggle';
+import { getAuthContext } from '@/lib/authServer';
+import { ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface ResourcePageProps {
   params: Promise<{ slug: string }>;
@@ -129,6 +131,7 @@ export async function generateMetadata({ params }: ResourcePageProps): Promise<M
 export default async function ResourceDetailPage({ params }: ResourcePageProps) {
   const { slug } = await params;
   const item = await getResource(slug);
+  const auth = await getAuthContext();
 
   if (!item) {
     notFound();
@@ -140,20 +143,34 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
   ).slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-kannada">
+    <div className="min-h-screen flex flex-col font-kannada text-neutral-900 relative">
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-xs">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-50 liquid-glass border-b border-white/60">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-orange-600 transition"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-neutral-600 hover:text-orange-600 transition group"
           >
-            <span>←</span>
+            <ArrowLeft className="w-4 h-4 text-neutral-500 group-hover:text-orange-600 transition" />
             <span>ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ</span>
           </Link>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <SearchModeToggle />
+
+            {/* Authenticated Admin quick capsule */}
+            {auth.isAdmin && (
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-950 text-xs font-semibold hover:bg-orange-500/25 transition shadow-2xs"
+                title="ನಿರ್ವಾಹಕ ಕಂಟ್ರೋಲ್ ಸೆಂಟರ್"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
+                <span className="kn hidden sm:inline">ನಿರ್ವಾಹಕ ಪ್ಯಾನೆಲ್</span>
+                <span className="kn sm:hidden">Admin</span>
+              </Link>
+            )}
+
             <Link href="/dashboard" className="text-sm font-bold text-orange-600 hidden xs:inline-flex">
               ಪ್ರತಿಭಾ ಕನ್ನಡ
             </Link>
@@ -164,7 +181,7 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
       {/* Article Container */}
       <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8 flex-1 w-full">
 
-        <article className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-6 sm:p-10 mb-8">
+        <article className="reading-surface rounded-3xl p-6 sm:p-10 mb-8 shadow-xs">
 
           {/* Top badges */}
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -297,7 +314,8 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
                 href="/dashboard"
                 className="btn-primary text-xs px-5 py-2.5"
               >
-                ಇನ್ನಷ್ಟು ಸಂಪನ್ಮೂಲಗಳನ್ನು ಓದಿ →
+                <span>ಇನ್ನಷ್ಟು ಸಂಪನ್ಮೂಲಗಳನ್ನು ಓದಿ</span>
+                <ArrowRight className="w-3.5 h-3.5 inline" />
               </Link>
             </div>
           </div>
@@ -307,7 +325,7 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
         {/* Related resources */}
         {related.length > 0 && (
           <section>
-            <h2 className="text-base font-bold text-slate-800 mb-4">
+            <h2 className="text-base font-bold text-neutral-800 mb-4 kn">
               ಸಂಬಂಧಿತ ಇತರ ಸಂಪನ್ಮೂಲಗಳು:
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -315,18 +333,19 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
                 <Link
                   key={rel.id}
                   href={`/dashboard/resource/${rel.slug}`}
-                  className="bg-white p-4 rounded-2xl border border-slate-200 hover:border-orange-300 hover:shadow-xs transition group flex flex-col justify-between"
+                  className="liquid-glass-card p-4 rounded-2xl flex flex-col justify-between group"
                 >
                   <div>
                     <span className="text-[10px] font-bold text-orange-600 uppercase mb-1 block">
                       {rel.category}
                     </span>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-orange-600 transition leading-snug">
+                    <h3 className="text-xs sm:text-sm font-bold text-neutral-900 group-hover:text-orange-600 transition leading-snug kn">
                       {rel.title}
                     </h3>
                   </div>
-                  <span className="text-xs text-orange-500 font-semibold mt-3 flex items-center gap-1">
-                    ಓದಿ →
+                  <span className="text-xs text-orange-600 font-semibold mt-3 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                    <span>ಓದಿ</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </Link>
               ))}
@@ -337,8 +356,8 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400">
-        <p>© {new Date().getFullYear()} ಪ್ರತಿಭಾ ಕನ್ನಡ — ಉಚಿತ ಶೈಕ್ಷಣಿಕ ವೇದಿಕೆ</p>
+      <footer className="bg-white/80 backdrop-blur-md border-t border-neutral-200/60 py-6 text-center text-xs text-neutral-500">
+        <p className="kn">© {new Date().getFullYear()} ಪ್ರತಿಭಾ ಕನ್ನಡ — ಉಚಿತ ಶೈಕ್ಷಣಿಕ ವೇದಿಕೆ</p>
       </footer>
 
     </div>

@@ -42,7 +42,7 @@ if (isRemote) {
   const keyType = process.env.SUPABASE_SERVICE_ROLE_KEY ? 'service_role' : 'anon';
 
   if (!supabaseUrl || !supabaseKey) {
-    console.log('\n⚠️  [Remote Audit Notice]');
+    console.log('\n[NOTICE] [Remote Audit]');
     console.log('   Remote audit mode requested (--remote), but Supabase credentials are not configured in environment or .env.local.');
     console.log('   Required: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY.');
     console.log('   Falling back safely to local static catalog.\n');
@@ -101,7 +101,7 @@ console.log(`[Catalog]  Target: ${auditTargetLabel}\n`);
 
 const results = auditCatalog(resourcesToAudit);
 
-console.log(`📊 Audit Summary:`);
+console.log(`[REPORT] Audit Summary:`);
 console.log(`- Total Resources Audited:     ${results.totalResources}`);
 console.log(`- Total Fields Inspected:      ${results.totalFieldsAudited}`);
 console.log(`- Clean Resources (No issues):  ${results.cleanCount}`);
@@ -109,7 +109,7 @@ console.log(`- Potential Issues Found:      ${results.totalIssuesFound}`);
 console.log('----------------------------------------------------------------\n');
 
 if (results.reportsWithIssues.length === 0) {
-  console.log('✅ All audited educational resources meet canonical Kannada orthographic standards!');
+  console.log('[PASS] All audited educational resources meet canonical Kannada orthographic standards!');
 } else {
   console.log('Findings breakdown:');
   for (const report of results.reportsWithIssues) {

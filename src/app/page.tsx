@@ -3,6 +3,9 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { SearchModeToggle } from '@/components/search/SearchModeToggle';
 import { HomeSearchForm } from '@/components/search/HomeSearchForm';
+import { KannadaParticleBackground } from '@/components/background/KannadaParticleBackground';
+import { getAuthContext } from '@/lib/authServer';
+import { ShieldCheck, ArrowRight, LogOut } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'ಪ್ರತಿಭಾ ಕನ್ನಡ — ಕನ್ನಡ ಕಲಿಕೆಗೆ ಉಚಿತ ಡಿಜಿಟಲ್ ವೇದಿಕೆ',
@@ -34,61 +37,20 @@ const CLASSES = [
 export default async function HomePage() {
   const cookieStore = await cookies();
   const searchMode = (cookieStore.get('pratibha_search_mode')?.value as 'kn' | 'en') || 'kn';
+  const auth = await getAuthContext();
 
   return (
-    <div className="relative min-h-screen font-kannada bg-[#FAF9F6] text-neutral-900 overflow-hidden selection:bg-orange-500/20 selection:text-orange-950">
+    <div className="relative min-h-screen font-kannada text-neutral-900 overflow-x-clip selection:bg-neutral-900/10 selection:text-neutral-950 bg-[#fafafa]">
+      {/* ─────────────────────────────────────────────────────────────
+          1. LIVE ANIMATED KANNADA TYPOGRAPHY CANVAS BACKGROUND
+      ───────────────────────────────────────────────────────────── */}
+      <KannadaParticleBackground />
 
       {/* ─────────────────────────────────────────────────────────────
-          1. NATURAL LIVE AMBIENT MESH GRADIENTS (OLED / iPhone Live Aura)
+          2. FLOATING IPHONE GLASS NAVBAR (Neutral iOS Liquid Glass)
       ───────────────────────────────────────────────────────────── */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Soft morning amber glow */}
-        <div
-          className="aurora-live-1 absolute -top-[15%] left-[10%] w-[680px] h-[680px] rounded-full blur-[100px] opacity-60"
-          style={{
-            background: 'radial-gradient(circle, rgba(255, 185, 130, 0.55) 0%, rgba(254, 215, 170, 0.35) 45%, transparent 75%)',
-          }}
-        />
-
-        {/* Delicate blush dawn glow */}
-        <div
-          className="aurora-live-2 absolute top-[20%] -right-[10%] w-[720px] h-[720px] rounded-full blur-[115px] opacity-55"
-          style={{
-            background: 'radial-gradient(circle, rgba(254, 205, 211, 0.50) 0%, rgba(253, 186, 116, 0.25) 45%, transparent 75%)',
-          }}
-        />
-
-        {/* Honey sunlight base */}
-        <div
-          className="aurora-live-3 absolute top-[55%] -left-[15%] w-[650px] h-[650px] rounded-full blur-[110px] opacity-45"
-          style={{
-            background: 'radial-gradient(circle, rgba(254, 240, 138, 0.45) 0%, rgba(254, 215, 170, 0.25) 50%, transparent 70%)',
-          }}
-        />
-
-        {/* Subtle bottom lavender warmth */}
-        <div
-          className="aurora-live-1 absolute -bottom-[10%] right-[15%] w-[620px] h-[620px] rounded-full blur-[105px] opacity-40"
-          style={{
-            background: 'radial-gradient(circle, rgba(243, 232, 255, 0.40) 0%, rgba(254, 205, 211, 0.20) 50%, transparent 75%)',
-          }}
-        />
-
-        {/* Ultra-subtle paper grain texture overlay for tactile Notion feel */}
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage: `radial-gradient(#000 1px, transparent 1px)`,
-            backgroundSize: '24px 24px',
-          }}
-        />
-      </div>
-
-      {/* ─────────────────────────────────────────────────────────────
-          2. FLOATING IPHONE GLASS NAVBAR (Apple Dynamic Island / Notion style)
-      ───────────────────────────────────────────────────────────── */}
-      <header className="sticky top-4 z-50 px-4 sm:px-6">
-        <div className="mx-auto max-w-5xl iphone-glass rounded-full px-4 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between transition-all gap-2">
+      <header className="sticky top-4 z-50 px-4 sm:px-6 pointer-events-none">
+        <div className="mx-auto max-w-5xl liquid-glass-navbar rounded-full px-4 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between transition-all gap-2 pointer-events-auto">
           <Link href="/" className="flex items-center gap-2 group shrink-0">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white font-extrabold text-sm shadow-sm group-hover:scale-105 transition-transform">
               ಪ್ರ
@@ -100,26 +62,62 @@ export default async function HomePage() {
 
           <nav className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <SearchModeToggle initialMode={searchMode} />
+
+            {/* Authenticated Admin Quick Capsule */}
+            {auth.isAdmin && (
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-950 text-xs font-semibold hover:bg-orange-500/25 transition shadow-2xs"
+                id="nav-admin"
+                title="ನಿರ್ವಾಹಕ ಕಂಟ್ರೋಲ್ ಸೆಂಟರ್"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
+                <span className="kn hidden sm:inline">ನಿರ್ವಾಹಕ ಪ್ಯಾನೆಲ್</span>
+                <span className="kn sm:hidden">Admin</span>
+              </Link>
+            )}
+
             <Link
               href="/dashboard"
               className="text-xs sm:text-sm font-medium text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-full hover:bg-white/60 transition hidden md:inline-flex"
             >
               ಸಂಪನ್ಮೂಲಗಳು
             </Link>
-            <Link
-              href="/login"
-              className="btn-notion-glass text-xs sm:text-sm !py-1.5 !px-3 sm:!px-4 !rounded-full"
-              id="nav-login"
-            >
-              ಲಾಗಿನ್
-            </Link>
-            <Link
-              href="/register"
-              className="btn-notion-dark text-xs sm:text-sm !py-1.5 !px-3.5 sm:!px-4 !rounded-full hidden sm:inline-flex"
-              id="nav-register"
-            >
-              ಖಾತೆ ತೆರೆಯಿರಿ
-            </Link>
+
+            {auth.isAuthenticated && auth.user ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-neutral-800 hidden sm:inline kn">
+                  {auth.user.name}
+                </span>
+                <form action="/api/auth/logout" method="POST">
+                  <button
+                    type="submit"
+                    className="btn-liquid-glass text-xs !py-1.5 !px-3 !rounded-full text-red-600 hover:text-red-700"
+                    title="ಲಾಗ್ ಔಟ್"
+                  >
+                    <LogOut className="w-3.5 h-3.5 sm:mr-1 inline" />
+                    <span className="hidden sm:inline">ಲಾಗ್ ಔಟ್</span>
+                  </button>
+                </form>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="btn-notion-glass text-xs sm:text-sm !py-1.5 !px-3 sm:!px-4 !rounded-full"
+                  id="nav-login"
+                >
+                  ಲಾಗಿನ್
+                </Link>
+                <Link
+                  href="/register"
+                  className="btn-notion-dark text-xs sm:text-sm !py-1.5 !px-3.5 sm:!px-4 !rounded-full hidden sm:inline-flex"
+                  id="nav-register"
+                >
+                  ಖಾತೆ ತೆರೆಯಿರಿ
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </header>
@@ -291,7 +289,7 @@ export default async function HomePage() {
           7. NOTION-STYLE FEATURE SHOWCASE (Clean, live & distraction-free)
       ───────────────────────────────────────────────────────────── */}
       <section className="relative z-10 py-14 px-4 sm:px-6">
-        <div className="mx-auto max-w-5xl iphone-glass rounded-3xl p-8 sm:p-12">
+        <div className="mx-auto max-w-5xl">
           <div className="max-w-2xl mx-auto text-center mb-10">
             <span className="text-xs font-bold uppercase tracking-widest text-orange-700">
               ಸುಲಭ ಕಲಿಕಾ ತತ್ವ
@@ -371,8 +369,6 @@ export default async function HomePage() {
           </p>
           <div className="flex items-center gap-4 text-xs text-neutral-500 font-medium">
             <Link href="/dashboard" className="hover:text-orange-600 transition">ಸಂಪನ್ಮೂಲಗಳು</Link>
-            <span>·</span>
-            <Link href="/admin" className="hover:text-orange-600 transition">ನಿರ್ವಾಹಕ (Admin)</Link>
             <span>·</span>
             <Link href="/login" className="hover:text-orange-600 transition">ಲಾಗಿನ್</Link>
             <span>·</span>

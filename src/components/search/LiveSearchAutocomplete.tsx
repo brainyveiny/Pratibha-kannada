@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguageMode } from '@/lib/languageModeStore';
 import type { SearchSuggestion } from '@/lib/searchSuggestions';
+import { Search, Tag, BookOpen } from 'lucide-react';
 
 export interface LiveSearchAutocompleteProps {
   variant?: 'hero' | 'compact';
@@ -277,13 +278,13 @@ export function LiveSearchAutocomplete({
         )}
       </form>
 
-      {/* Autocomplete Dropdown Menu */}
+      {/* Autocomplete Dropdown Menu with genuine iOS Liquid Glass */}
       {isOpen && (
         <div
           id={`${inputId}-suggestions`}
           role="listbox"
           aria-label="ಹುಡುಕಾಟ ಸಲಹೆಗಳು"
-          className="absolute left-0 right-0 top-full mt-2 z-50 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-neutral-200/80 overflow-hidden divide-y divide-neutral-100 max-h-80 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-150"
+          className="absolute left-0 right-0 top-full mt-2 z-50 liquid-glass rounded-2xl shadow-2xl border border-white/60 overflow-hidden divide-y divide-white/20 max-h-80 overflow-y-auto animate-in fade-in slide-in-from-top-1 duration-200"
         >
           {suggestions.length > 0 ? (
             suggestions.map((item, index) => {
@@ -297,13 +298,25 @@ export function LiveSearchAutocomplete({
                   onClick={() => handleSelectSuggestion(item)}
                   onMouseEnter={() => setSelectedIndex(index)}
                   className={`px-4 py-3 cursor-pointer flex items-center justify-between gap-3 transition-colors min-h-[44px] ${
-                    isSelected ? 'bg-orange-50/90 text-orange-950' : 'hover:bg-neutral-50 text-neutral-800'
+                    isSelected ? 'bg-orange-500/15 text-orange-950 font-medium' : 'hover:bg-white/40 text-neutral-800'
                   }`}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="shrink-0 text-base">
-                      {item.type === 'topic' ? '🏷️' : item.type === 'resource' ? '📚' : '🔍'}
-                    </span>
+                    <div
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                        isSelected
+                          ? 'bg-orange-500 text-white shadow-xs'
+                          : 'bg-white/40 border border-white/60 text-neutral-600'
+                      }`}
+                    >
+                      {item.type === 'topic' ? (
+                        <Tag className="w-4 h-4" />
+                      ) : item.type === 'resource' ? (
+                        <BookOpen className="w-4 h-4" />
+                      ) : (
+                        <Search className="w-4 h-4" />
+                      )}
+                    </div>
                     <div className="min-w-0">
                       <div className="text-sm font-semibold truncate kn">
                         {item.title}

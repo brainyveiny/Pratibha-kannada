@@ -2,6 +2,7 @@
 
 import React, { useTransition } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { ArrowRight } from 'lucide-react';
 import { useLanguageMode, type LanguageMode } from '@/lib/languageModeStore';
 
 export interface SearchModeToggleProps {
@@ -36,20 +37,20 @@ export function SearchModeToggle({
 
   return (
     <div className={`inline-flex items-center gap-1.5 ${className}`}>
-      {/* Accessible Segmented Pill Toggle */}
+      {/* Accessible Segmented Pill Toggle with iOS liquid glass finish */}
       <div
         role="group"
         aria-label="ಭಾಷಾ ಮೋಡ್ ಆಯ್ಕೆ (Language search mode selection)"
-        className="inline-flex items-center p-0.5 rounded-full bg-neutral-100/90 border border-neutral-200/80 shadow-xs transition-all"
+        className="inline-flex items-center p-0.5 rounded-full bg-white/75 backdrop-blur-md border border-neutral-200/70 shadow-xs transition-all"
       >
         {/* Kannada Mode Button */}
         <button
           type="button"
           onClick={() => handleSelectMode('kannada')}
           id="search-mode-toggle-kn"
-          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 ${
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 active:scale-95 ${
             !isEnglish
-              ? 'bg-white text-orange-700 shadow-xs font-bold'
+              ? 'bg-white text-orange-700 shadow-sm font-bold border border-orange-100/60'
               : 'text-neutral-500 hover:text-neutral-900 hover:bg-white/40'
           }`}
           aria-pressed={!isEnglish}
@@ -63,9 +64,9 @@ export function SearchModeToggle({
           type="button"
           onClick={() => handleSelectMode('english')}
           id="search-mode-toggle-en"
-          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 ${
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 active:scale-95 ${
             isEnglish
-              ? 'bg-white text-orange-700 shadow-xs font-bold'
+              ? 'bg-white text-orange-700 shadow-sm font-bold border border-orange-100/60'
               : 'text-neutral-500 hover:text-neutral-900 hover:bg-white/40'
           }`}
           aria-pressed={isEnglish}
@@ -78,10 +79,13 @@ export function SearchModeToggle({
 
       {/* Status helper badge */}
       {showHelperBadge && isEnglish && (
-        <span className="hidden lg:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-50 text-orange-700 border border-orange-200/60">
-          En ➔ ಕ ಸಕ್ರಿಯ
+        <span className="hidden lg:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-50 text-orange-700 border border-orange-200/60">
+          <span>En</span>
+          <ArrowRight className="w-2.5 h-2.5 text-orange-600 inline" />
+          <span>ಕ ಸಕ್ರಿಯ</span>
         </span>
       )}
     </div>
   );
 }
+
