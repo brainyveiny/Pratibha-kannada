@@ -8,19 +8,17 @@ import { matchResourceQuery, scoreResourceMatch, transliterateToKannada } from '
 import { LiveSearchAutocomplete } from '@/components/search/LiveSearchAutocomplete';
 import { ShieldCheck, ArrowRight, LogOut } from 'lucide-react';
 
+import { SUPPORTED_CLASSES, formatGradeLabelKn } from '@/data/classes';
+
 export const metadata: Metadata = {
   title: 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ — ಪ್ರತಿಭಾ ಕನ್ನಡ',
   description: 'ಕನ್ನಡ ಸಂಪನ್ಮೂಲಗಳ ಉಚಿತ ಡಿಜಿಟಲ್ ಲೈಬ್ರರಿ',
 };
 
-const CLASSES = [
-  { label: '10ನೇ ತರಗತಿ', slug: '10' },
-  { label: '9ನೇ ತರಗತಿ',  slug: '9' },
-  { label: '8ನೇ ತರಗತಿ',  slug: '8' },
-  { label: '7ನೇ ತರಗತಿ',  slug: '7' },
-  { label: '6ನೇ ತರಗತಿ',  slug: '6' },
-  { label: 'ಪಿ.ಯು.ಸಿ',   slug: 'puc' },
-];
+const CLASSES = SUPPORTED_CLASSES.map((c) => ({
+  label: c.labelKn,
+  slug: c.slug,
+}));
 
 const CATEGORIES = [
   { label: 'ನೋಟ್ಸ್',                sub: 'Notes',           slug: 'notes' },
@@ -129,9 +127,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   // Filter & rank resources by relevance score
   const scoredResources = uniqueResources
     .filter((res) => {
-      // Class filter
-      if (activeClass && res.classGrade !== 'all' && res.classGrade !== activeClass) {
-        return false;
+      // Class filter (strictly supported levels: 8, 9, 10, puc-1, puc-2)
+      if (activeClass && res.classGrade !== 'all') {
+        const isPucMatch =
+          (activeClass === 'puc' && (res.classGrade === 'puc' || res.classGrade === 'puc-1' || res.classGrade === 'puc-2')) ||
+          ((activeClass === 'puc-1' || activeClass === 'puc-2') && res.classGrade === 'puc');
+        if (!isPucMatch && res.classGrade !== activeClass) {
+          return false;
+        }
       }
       // Category filter
       if (activeCat && res.category !== activeCat) {
@@ -253,7 +256,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">ತರಗತಿ ಆಯ್ಕೆಮಾಡಿ</h2>
             {activeClass && (
               <Link href={activeCat ? `/dashboard?cat=${activeCat}${searchMode === 'en' ? '&mode=en' : ''}` : searchMode === 'en' ? '/dashboard?mode=en' : '/dashboard'} className="text-xs text-orange-600 hover:underline">
-                ಎಲ್ಲಾ ತರಗತಿಗಳನ್ನು ತೋರಿಸಿ
+                ಎಲ್ಲಾ ಬೆಂಬಲಿತ ತರಗತಿಗಳನ್ನು ತೋರಿಸಿ
               </Link>
             )}
           </div>
@@ -267,7 +270,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   : 'liquid-glass-pill text-neutral-700 hover:text-neutral-950'
               }`}
             >
-              ಎಲ್ಲಾ ತರಗತಿಗಳು
+              ಎಲ್ಲಾ ಬೆಂಬಲಿತ ತರಗತಿಗಳು
             </Link>
             {CLASSES.map((c) => (
               <Link
@@ -389,9 +392,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     {/* Badges */}
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/20 text-orange-900">
-                        {item.classGrade === 'all'
-                          ? 'ಎಲ್ಲಾ ತರಗತಿಗಳು'
-                          : `${item.classGrade}ನೇ ತರಗತಿ`}
+                        {formatGradeLabelKn(item.classGrade)}
                       </span>
                       <span className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
                         {item.category}

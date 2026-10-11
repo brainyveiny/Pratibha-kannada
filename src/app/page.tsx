@@ -25,14 +25,7 @@ const CATEGORIES = [
   { label: 'ಅಭ್ಯಾಸ ಪರೀಕ್ಷೆ',         sub: 'Practice Worksheets',  href: '/dashboard?cat=practice',        code: 'W' },
 ];
 
-const CLASSES = [
-  { label: '10ನೇ ತರಗತಿ', sub: 'SSLC Board', href: '/dashboard?class=10' },
-  { label: '9ನೇ ತರಗತಿ',  sub: 'High School', href: '/dashboard?class=9' },
-  { label: '8ನೇ ತರಗತಿ',  sub: 'High School', href: '/dashboard?class=8' },
-  { label: '7ನೇ ತರಗತಿ',  sub: 'Middle School', href: '/dashboard?class=7' },
-  { label: '6ನೇ ತರಗತಿ',  sub: 'Middle School', href: '/dashboard?class=6' },
-  { label: 'ಪಿ.ಯು.ಸಿ',    sub: 'PUC I & II', href: '/dashboard?class=puc' },
-];
+import { SUPPORTED_CLASSES } from '@/data/classes';
 
 export default async function HomePage() {
   const cookieStore = await cookies();
@@ -146,7 +139,7 @@ export default async function HomePage() {
             ಕನ್ನಡ ಸಾಹಿತ್ಯ, ವ್ಯಾಕರಣ ಮತ್ತು ಪರೀಕ್ಷಾ ಸಂಪನ್ಮೂಲಗಳ ಡಿಜಿಟಲ್ ಭಂಡಾರ
           </p>
           <p className="fade-up fade-up-2 text-sm sm:text-base text-neutral-500 max-w-xl mx-auto mb-8 font-normal">
-            6ನೇ ತರಗತಿಯಿಂದ 10ನೇ ತರಗತಿ ಹಾಗೂ ಪಿಯುಸಿ ವಿದ್ಯಾರ್ಥಿಗಳಿಗಾಗಿ ಸಂಪೂರ್ಣ ಉಚಿತ ನೋಟ್ಸ್, ಪ್ರಶ್ನೋತ್ತರ ಮತ್ತು ವ್ಯಾಕರಣ ಮಾರ್ಗದರ್ಶಿ.
+            8ನೇ ತರಗತಿಯಿಂದ 10ನೇ ತರಗತಿ ಹಾಗೂ ಪಿಯುಸಿ (1st & 2nd PUC) ವಿದ್ಯಾರ್ಥಿಗಳಿಗಾಗಿ ಸಂಪೂರ್ಣ ಉಚಿತ ನೋಟ್ಸ್, ಪ್ರಶ್ನೋತ್ತರ ಮತ್ತು ವ್ಯಾಕರಣ ಮಾರ್ಗದರ್ಶಿ.
           </p>
 
           {/* ─── iPhone Spotlight Style Glass Search Bar ─── */}
@@ -187,7 +180,7 @@ export default async function HomePage() {
             <div className="text-xs font-medium text-neutral-500 mt-0.5 kn">ಸಂಪನ್ಮೂಲಗಳು</div>
           </div>
           <div className="border-r border-slate-200/50 last:border-none">
-            <div className="text-xl sm:text-2xl font-extrabold text-neutral-900 font-mono">6–10</div>
+            <div className="text-xl sm:text-2xl font-extrabold text-neutral-900 font-mono">8–PUC</div>
             <div className="text-xs font-medium text-neutral-500 mt-0.5 kn">ತರಗತಿ & ಪಿಯುಸಿ</div>
           </div>
           <div>
@@ -211,22 +204,22 @@ export default async function HomePage() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {CLASSES.map((c) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+            {SUPPORTED_CLASSES.map((c) => (
               <Link
                 key={c.href}
                 href={c.href}
-                id={`class-${c.label}`}
+                id={`class-${c.slug}`}
                 className="iphone-glass-card rounded-2xl p-4 flex flex-col items-center text-center group cursor-pointer"
               >
                 <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-700 flex items-center justify-center font-bold text-sm mb-2 group-hover:bg-neutral-900 group-hover:text-white transition-colors duration-200">
-                  {c.label.split('')[0]}
+                  {c.slug.startsWith('puc') ? 'ಪಿ' : c.slug}
                 </div>
                 <span className="text-sm font-bold text-neutral-900 group-hover:text-orange-700 kn">
-                  {c.label}
+                  {c.labelKn}
                 </span>
                 <span className="text-[11px] text-neutral-400 mt-0.5 font-medium">
-                  {c.sub}
+                  {c.subEn}
                 </span>
               </Link>
             ))}
@@ -339,7 +332,7 @@ export default async function HomePage() {
             ಇಂದೇ ನಿಮ್ಮ ಕಲಿಕೆ ಆರಂಭಿಸಿ
           </h2>
           <p className="text-sm text-neutral-600 mb-6 kn max-w-md mx-auto">
-            ಯಾವುದೇ ಶುಲ್ಕವಿಲ್ಲದೆ, ಎಲ್ಲಾ ತರಗತಿಗಳ ಕನ್ನಡ ಅಧ್ಯಯನ ಸಾಮಗ್ರಿಗಳನ್ನು ಉಚಿತವಾಗಿ ಪಡೆದುಕೊಳ್ಳಿ.
+            ಯಾವುದೇ ಶುಲ್ಕವಿಲ್ಲದೆ, 8-10ನೇ ತರಗತಿ ಹಾಗೂ ಪಿಯುಸಿ ಕನ್ನಡ ಅಧ್ಯಯನ ಸಾಮಗ್ರಿಗಳನ್ನು ಉಚಿತವಾಗಿ ಪಡೆದುಕೊಳ್ಳಿ.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link

@@ -52,11 +52,15 @@ export async function GET(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('is_published', false);
 
-    // 2. Fetch classes & categories hierarchy
-    const { data: classes } = await supabase
+    // 2. Fetch classes & categories hierarchy (supported academic levels only: Class 8, 9, 10, 1st & 2nd PUC)
+    const { data: rawClasses } = await supabase
       .from('classes')
       .select('id, name, name_en, slug, sort_order')
       .order('sort_order', { ascending: false });
+
+    const classes = (rawClasses || []).filter(
+      (c) => c.slug !== 'class-6' && c.slug !== 'class-7'
+    );
 
     const { data: categories } = await supabase
       .from('categories')

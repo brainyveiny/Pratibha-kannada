@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { SUPPORTED_CLASSES } from '@/data/classes';
 
 interface RegisterFormProps {
   initialError?: string | null;
@@ -196,12 +197,11 @@ export function RegisterForm({ initialError }: RegisterFormProps) {
               onChange={(e) => setGrade(e.target.value)}
               className="w-full appearance-none rounded-xl sm:rounded-2xl border border-neutral-200/90 bg-white/70 backdrop-blur-md px-4 py-3 text-sm text-neutral-900 shadow-sm transition-all duration-200 focus:border-orange-500/80 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10 disabled:opacity-60 disabled:cursor-not-allowed kn font-medium pr-10"
             >
-              <option value="10">10ನೇ ತರಗತಿ (SSLC Board)</option>
-              <option value="9">9ನೇ ತರಗತಿ (High School)</option>
-              <option value="8">8ನೇ ತರಗತಿ (High School)</option>
-              <option value="7">7ನೇ ತರಗತಿ (Middle School)</option>
-              <option value="6">6ನೇ ತರಗತಿ (Middle School)</option>
-              <option value="puc">ಪಿ.ಯು.ಸಿ (PUC I & II)</option>
+              {SUPPORTED_CLASSES.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.labelKn} ({c.labelEn})
+                </option>
+              ))}
             </select>
             <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

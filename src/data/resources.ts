@@ -2,7 +2,7 @@ export interface ResourceItem {
   id: string;
   slug: string;
   title: string;
-  classGrade: '10' | '9' | '8' | '7' | '6' | 'puc' | 'all';
+  classGrade: '10' | '9' | '8' | 'puc-1' | 'puc-2' | 'puc' | 'all';
   category: 'notes' | 'grammar' | 'question-papers' | 'previous-year' | 'qa' | 'essay' | 'practice' | 'poets';
   topic: string;
   authorOrSource?: string;

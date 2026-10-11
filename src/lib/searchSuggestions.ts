@@ -3,6 +3,7 @@ import type { GlossaryEntry } from '../data/kannadaGlossary';
 import { KANNADA_RESOURCES } from '../data/resources';
 import type { ResourceItem } from '../data/resources';
 import { normalizeKannadaUnicode, transliterateToKannada } from './kannadaTransliteration';
+import { formatGradeLabelKn } from '../data/classes';
 
 export type SuggestionType = 'topic' | 'resource' | 'category' | 'query';
 
@@ -248,10 +249,10 @@ export function getSearchSuggestions(
         id: `res-${res.id || res.slug}`,
         title: res.title,
         type: 'resource',
-        subtitle: `${res.classGrade !== 'all' ? `${res.classGrade}ನೇ ತರಗತಿ • ` : ''}${res.category === 'notes' ? 'ನೋಟ್ಸ್' : res.category === 'grammar' ? 'ವ್ಯಾಕರಣ' : 'ಅಧ್ಯಯನ ಸಾಮಗ್ರಿ'}`,
+        subtitle: `${res.classGrade !== 'all' ? `${formatGradeLabelKn(res.classGrade)} • ` : ''}${res.category === 'notes' ? 'ನೋಟ್ಸ್' : res.category === 'grammar' ? 'ವ್ಯಾಕರಣ' : 'ಅಧ್ಯಯನ ಸಾಮಗ್ರಿ'}`,
         url: `/dashboard/resource/${res.slug || res.id}`,
         matchedTerm: matchedField,
-        badge: res.classGrade !== 'all' ? `${res.classGrade}ನೇ ತರಗತಿ` : 'ಎಲ್ಲಾ ತರಗತಿ',
+        badge: formatGradeLabelKn(res.classGrade),
         score: matchScore,
       });
     }

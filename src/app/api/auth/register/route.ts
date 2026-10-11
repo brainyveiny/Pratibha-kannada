@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { recordUserRegistration } from '@/lib/userStore';
+import { isSupportedGrade } from '@/data/classes';
 import {
   checkRateLimit,
   getClientIp,
@@ -85,8 +86,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.redirect(new URL('/register?error=password_too_short', request.url));
   }
 
+  // Validate supported academic class (only 8, 9, 10, puc-1, puc-2, or legacy puc are permitted)
+  const normalizedGrade = (grade || '10').trim().toLowerCase();
+  if (normalizedGrade && !isSupportedGrade(normalizedGrade)) {
+    if (isJson) {
+      return NextResponse.json(
+        { error: 'ಆಯ್ಕೆಮಾಡಿದ ತರಗತಿ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ. 8, 9, 10 ಹಾಗೂ ಪಿಯುಸಿ ಮಾತ್ರ ಲಭ್ಯ (Supported classes: 8, 9, 10, 1st & 2nd PUC)' },
+        { status: 400 }
+      );
+    }
+    return NextResponse.redirect(new URL('/register?error=unsupported_grade', request.url));
+  }
+
   // Record student in secure user store with scrypt password hash
-  const regResult = recordUserRegistration(sanitizedName, email, grade, password);
+  const regResult = recordUserRegistration(sanitizedName, email, normalizedGrade, password);
   if (!regResult.success || !regResult.user) {
     if (isJson) {
       return NextResponse.json({ error: regResult.error || 'ನೋಂದಣಿ ವಿಫಲವಾಗಿದೆ' }, { status: 409 });

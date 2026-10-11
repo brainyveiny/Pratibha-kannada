@@ -6,6 +6,7 @@ import { KANNADA_RESOURCES, type ResourceItem } from '@/data/resources';
 import { SearchModeToggle } from '@/components/search/SearchModeToggle';
 import { getAuthContext } from '@/lib/authServer';
 import { ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
+import { formatGradeLabelKn } from '@/data/classes';
 
 interface ResourcePageProps {
   params: Promise<{ slug: string }>;
@@ -186,7 +187,7 @@ export default async function ResourceDetailPage({ params }: ResourcePageProps) 
           {/* Top badges */}
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <span className="text-xs font-bold px-3 py-1 rounded-full bg-orange-100 text-orange-800">
-              {item.classGrade === 'all' ? 'ಎಲ್ಲಾ ತರಗತಿಗಳು' : `${item.classGrade}ನೇ ತರಗತಿ`}
+              {formatGradeLabelKn(item.classGrade)}
             </span>
             <span className="text-xs font-medium px-3 py-1 rounded-full bg-slate-100 text-slate-700 uppercase tracking-wide">
               {item.category}

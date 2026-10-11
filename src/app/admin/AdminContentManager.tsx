@@ -398,7 +398,7 @@ export default function AdminContentManager({
                 onChange={(e) => setClassFilter(e.target.value)}
                 className="text-xs border border-slate-200 rounded-xl px-3 py-2 bg-white text-slate-700 focus:outline-none focus:border-orange-500 kn"
               >
-                <option value="">ಎಲ್ಲಾ ತರಗತಿಗಳು (All Classes)</option>
+                <option value="">ಎಲ್ಲಾ ಬೆಂಬಲಿತ ತರಗತಿಗಳು (All Supported Classes)</option>
                 {classes.map((c) => (
                   <option key={c.id} value={c.slug}>
                     {c.name}
