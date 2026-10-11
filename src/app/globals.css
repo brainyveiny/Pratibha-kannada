@@ -6,11 +6,11 @@
 
 @layer base {
   :root {
-    --natural-bg: #FAF9F6;
-    --apple-glass-bg: rgba(255, 255, 255, 0.68);
-    --apple-glass-border: rgba(255, 255, 255, 0.85);
-    --apple-glass-highlight: rgba(255, 255, 255, 0.95);
-    --apple-glass-shadow: 0 10px 36px -6px rgba(0, 0, 0, 0.04), 0 0 1px 1px rgba(255, 255, 255, 0.7);
+    --natural-bg: #fafafa;
+    --apple-glass-bg: rgba(255, 255, 255, 0.12);
+    --apple-glass-border: rgba(255, 255, 255, 0.25);
+    --apple-glass-highlight: rgba(255, 255, 255, 0.50);
+    --apple-glass-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.50);
   }
 
   html {
@@ -24,7 +24,7 @@
   body {
     background-color: var(--natural-bg);
     color: #1a1a1a;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   :lang(kn), .kn, .font-kannada {
@@ -37,94 +37,148 @@
 }
 
 @layer components {
-  /* ─── iPhone UI Level Glass Panel ─── */
-  .iphone-glass {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(28px) saturate(190%);
-    -webkit-backdrop-filter: blur(28px) saturate(190%);
-    border: 1px solid rgba(255, 255, 255, 0.85);
+  /* ─── Isolated iOS 26 Liquid Glass Navbar (Strict Physical Boundary Containment) ─── */
+  .liquid-glass-navbar {
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.30);
     box-shadow: 
-      0 12px 38px 0 rgba(30, 20, 10, 0.04),
+      0 8px 30px -6px rgba(0, 0, 0, 0.04),
       0 1px 3px 0 rgba(0, 0, 0, 0.02),
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.95),
-      inset 0 -1px 1px 0 rgba(0, 0, 0, 0.02);
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.60);
+    contain: paint;
+    isolation: isolate;
+    overflow: clip;
+    background-clip: padding-box;
   }
 
-  /* ─── iPhone Glass Card (Interactive) ─── */
-  .iphone-glass-card {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.75);
+  /* ─── iOS 26 Liquid Glass Panel (Zero Color Tint, Pure Neutral Luminance & Blur) ─── */
+  .liquid-glass, .iphone-glass {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow: 
-      0 8px 30px -4px rgba(30, 20, 10, 0.03),
-      inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
-    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      0 12px 32px -8px rgba(0, 0, 0, 0.04),
+      0 1px 3px 0 rgba(0, 0, 0, 0.02),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.50);
+    isolation: isolate;
+    overflow: clip;
+    background-clip: padding-box;
   }
-  .iphone-glass-card:hover {
-    background: rgba(255, 255, 255, 0.85);
-    border-color: rgba(255, 255, 255, 0.95);
+
+  /* ─── iOS 26 Liquid Glass Card (Neutral Translucent Surface) ─── */
+  .liquid-glass-card, .iphone-glass-card {
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 
+      0 8px 24px -6px rgba(0, 0, 0, 0.03),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.40);
+    isolation: isolate;
+    overflow: clip;
+    background-clip: padding-box;
+    transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .liquid-glass-card:hover, .iphone-glass-card:hover {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.40);
     transform: translateY(-2px);
     box-shadow: 
-      0 18px 45px -8px rgba(220, 100, 30, 0.08),
-      0 4px 12px 0 rgba(0, 0, 0, 0.03),
-      inset 0 1px 1.5px 0 rgba(255, 255, 255, 1);
+      0 14px 32px -8px rgba(0, 0, 0, 0.06),
+      0 2px 8px 0 rgba(0, 0, 0, 0.02),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.60);
+  }
+  .liquid-glass-card:active, .iphone-glass-card:active {
+    transform: scale(0.985);
+    transition-duration: 0.1s;
   }
 
-  /* ─── iPhone Frosted Pill (Segmented Control) ─── */
-  .iphone-glass-pill {
-    background: rgba(255, 255, 255, 0.6);
+  /* ─── iOS 26 Liquid Frosted Pill ─── */
+  .liquid-glass-pill, .iphone-glass-pill {
+    background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     box-shadow: 
-      0 2px 8px rgba(0, 0, 0, 0.02),
-      inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    transition: all 0.2s ease;
+      0 2px 8px rgba(0, 0, 0, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.40);
+    isolation: isolate;
+    overflow: clip;
+    background-clip: padding-box;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .iphone-glass-pill:hover {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(255, 255, 255, 0.95);
+  .liquid-glass-pill:hover, .iphone-glass-pill:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.40);
     transform: translateY(-1px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.50);
+  }
+  .liquid-glass-pill:active, .iphone-glass-pill:active {
+    transform: scale(0.97);
   }
 
-  /* ─── Notion-Style Buttons ─── */
-  .btn-notion-dark {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#191919] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-[#2c2c2c] hover:shadow-md active:scale-[0.98];
+  /* ─── High-Legibility Solid Reading Surface (Dedicated for Educational Kannada Passages) ─── */
+  .reading-surface {
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.85);
+    box-shadow: 0 6px 24px -4px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
   }
 
-  .btn-notion-glass {
-    background: rgba(255, 255, 255, 0.7);
+  /* ─── Liquid Segmented Control Container ─── */
+  .liquid-segmented-container {
+    background: rgba(255, 255, 255, 0.10);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-gray-800 transition-all duration-200 hover:bg-white hover:border-white hover:text-black hover:shadow-md active:scale-[0.98];
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
+  /* ─── Buttons ─── */
+  .btn-liquid-brand, .btn-notion-dark {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-neutral-800 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2;
+  }
+
+  .btn-liquid-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-orange-600 hover:to-amber-600 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2;
+  }
+
+  .btn-liquid-glass, .btn-notion-glass {
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.50);
+    @apply inline-flex items-center justify-center gap-2 rounded-xl sm:rounded-2xl px-5 py-2.5 text-sm font-semibold text-neutral-800 transition-all duration-200 hover:bg-white/40 hover:border-white/50 hover:text-neutral-950 hover:shadow-md active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-neutral-900/20;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gray-900 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-gray-800 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-neutral-900 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-neutral-800 hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:ring-offset-2;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-gray-200/80 bg-white/80 backdrop-blur-md px-6 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-200 hover:border-gray-900 hover:text-gray-900 hover:bg-white active:scale-95;
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white/40 backdrop-blur-md px-6 py-2.5 text-sm font-semibold text-neutral-700 transition-all duration-200 hover:border-neutral-900 hover:text-neutral-900 hover:bg-white active:scale-95;
   }
 
   .btn-brand {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-pink-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-orange-600 hover:to-pink-600 hover:shadow-md active:scale-95;
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-orange-600 hover:to-amber-600 hover:shadow-md active:scale-95;
   }
 
   .card {
-    @apply rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-md shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5;
+    @apply rounded-2xl border border-neutral-200/60 bg-white/40 backdrop-blur-md shadow-xs transition-all duration-200 hover:shadow-sm hover:bg-white/60 hover:-translate-y-0.5;
   }
 
   .input {
-    @apply w-full rounded-full border border-gray-200/80 bg-white/80 backdrop-blur-md px-5 py-3 text-sm text-gray-900 placeholder:text-gray-400 shadow-sm transition-all duration-200 focus:border-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-900/10;
+    @apply w-full rounded-full border border-neutral-200 bg-white/60 backdrop-blur-md px-5 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-xs transition-all duration-200 focus:border-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900/10;
   }
 
   .input-square {
-    @apply w-full rounded-xl sm:rounded-2xl border border-neutral-200/90 bg-white/70 backdrop-blur-md px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-sm transition-all duration-200 focus:border-orange-500/80 focus:bg-white focus:outline-none focus:ring-4 focus:ring-orange-500/10;
+    @apply w-full rounded-xl sm:rounded-2xl border border-neutral-200 bg-white/60 backdrop-blur-md px-4 py-3 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-xs transition-all duration-200 focus:border-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900/10;
   }
 
   .label {
@@ -136,24 +190,24 @@
   }
 
   .pill-active {
-    @apply bg-gray-900 text-white shadow-sm;
+    @apply bg-neutral-900 text-white shadow-xs font-semibold;
   }
 
   .pill-inactive {
-    @apply bg-white/70 backdrop-blur-sm text-gray-600 hover:bg-white hover:text-gray-900 border border-slate-200/60;
+    @apply bg-white/40 backdrop-blur-md text-neutral-700 hover:bg-white hover:text-neutral-950 border border-neutral-200/60;
   }
 }
 
-/* ─── Natural Live Ambient Aurora Animations (OLED iPhone / Notion mesh) ─── */
+/* ─── Natural Live Ambient Aurora Animations (Glossy OLED / Notion Mesh) ─── */
 @keyframes naturalAuroraOne {
   0%, 100% {
     transform: translate(0px, 0px) scale(1) rotate(0deg);
   }
   33% {
-    transform: translate(45px, -35px) scale(1.08) rotate(6deg);
+    transform: translate(35px, -25px) scale(1.05) rotate(4deg);
   }
   66% {
-    transform: translate(-30px, 25px) scale(0.94) rotate(-4deg);
+    transform: translate(-25px, 20px) scale(0.95) rotate(-3deg);
   }
 }
 
@@ -162,10 +216,10 @@
     transform: translate(0px, 0px) scale(1) rotate(0deg);
   }
   40% {
-    transform: translate(-40px, 30px) scale(1.1) rotate(-8deg);
+    transform: translate(-30px, 25px) scale(1.06) rotate(-5deg);
   }
   75% {
-    transform: translate(25px, -20px) scale(0.92) rotate(5deg);
+    transform: translate(20px, -15px) scale(0.94) rotate(4deg);
   }
 }
 
@@ -174,29 +228,32 @@
     transform: translate(0px, 0px) scale(1);
   }
   50% {
-    transform: translate(30px, 35px) scale(1.06);
+    transform: translate(25px, 25px) scale(1.04);
   }
 }
 
 @keyframes naturalPulseGlow {
   0%, 100% {
-    opacity: 0.55;
+    opacity: 0.50;
   }
   50% {
-    opacity: 0.78;
+    opacity: 0.68;
   }
 }
 
 .aurora-live-1 {
-  animation: naturalAuroraOne 22s cubic-bezier(0.4, 0, 0.2, 1) infinite, naturalPulseGlow 9s ease-in-out infinite;
+  animation: naturalAuroraOne 24s cubic-bezier(0.4, 0, 0.2, 1) infinite, naturalPulseGlow 10s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .aurora-live-2 {
-  animation: naturalAuroraTwo 26s cubic-bezier(0.4, 0, 0.2, 1) infinite, naturalPulseGlow 11s ease-in-out infinite reverse;
+  animation: naturalAuroraTwo 28s cubic-bezier(0.4, 0, 0.2, 1) infinite, naturalPulseGlow 12s ease-in-out infinite reverse;
+  will-change: transform, opacity;
 }
 
 .aurora-live-3 {
-  animation: naturalAuroraThree 18s cubic-bezier(0.4, 0, 0.2, 1) infinite, naturalPulseGlow 8s ease-in-out infinite;
+  animation: naturalAuroraThree 20s cubic-bezier(0.4, 0, 0.2, 1) infinite, naturalPulseGlow 9s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 /* ─── Smooth Entrance ─── */
@@ -212,3 +269,25 @@
 .fade-up-2 { animation-delay: 0.16s; }
 .fade-up-3 { animation-delay: 0.24s; }
 .fade-up-4 { animation-delay: 0.32s; }
+
+/* ─── Accessibility & Reduced Motion Support ─── */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .aurora-live-1, .aurora-live-2, .aurora-live-3, .fade-up {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ─── High Contrast Focus Indicators (WCAG AA) ─── */
+:focus-visible {
+  outline: 2px solid #ea580c;
+  outline-offset: 2px;
+}
+

@@ -2,10 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { KANNADA_RESOURCES } from '@/data/resources';
-import { verifySessionToken } from '@/lib/security';
+import { getAuthContext } from '@/lib/authServer';
 import { SearchModeToggle } from '@/components/search/SearchModeToggle';
 import { matchResourceQuery, scoreResourceMatch, transliterateToKannada } from '@/lib/kannadaTransliteration';
 import { LiveSearchAutocomplete } from '@/components/search/LiveSearchAutocomplete';
+import { ShieldCheck, ArrowRight, LogOut } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ — ಪ್ರತಿಭಾ ಕನ್ನಡ',
@@ -43,13 +44,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const activeClass = params.class ?? '';
   const activeCat = params.cat ?? '';
 
-  // Read and cryptographically verify student session cookie
-  const cookieStore = await cookies();
-  const sessionToken = cookieStore.get('pratibha_user')?.value;
-  const verification = verifySessionToken(sessionToken);
-  const currentStudent = verification.valid && verification.session ? verification.session : null;
+  // Resolve server-side authentication context
+  const auth = await getAuthContext();
+  const currentStudent = auth.user;
 
   // Search mode: defaults to 'kn' (Kannada), activated to 'en' (English letters) via query param or persistent cookie
+  const cookieStore = await cookies();
   const cookieMode =
     cookieStore.get('pratibha_language_mode')?.value ||
     cookieStore.get('pratibha_search_mode')?.value;
@@ -162,10 +162,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const filtered = scoredResources.map(({ res }) => res);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-kannada">
+    <div className="min-h-screen flex flex-col font-kannada relative">
 
-      {/* ─── Sticky Header with search ─── */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+      {/* ─── Sticky Header with search (iOS Liquid Glass Panel) ─── */}
+      <header className="sticky top-0 z-50 liquid-glass border-b border-white/60">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3 sm:gap-4">
           <Link href="/dashboard" className="text-lg sm:text-xl font-extrabold text-orange-600 shrink-0">
             ಪ್ರತಿಭಾ ಕನ್ನಡ
@@ -185,39 +185,45 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             />
           </div>
 
-          {/* Top-Right Area: Search Mode Toggle, Admin, and Student Profile */}
+          {/* Top-Right Area: Search Mode Toggle, Authenticated Admin, and Student Profile */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <SearchModeToggle initialMode={searchMode} showHelperBadge />
 
-            <Link
-              href="/admin"
-              className="text-xs text-slate-500 hover:text-orange-600 bg-slate-100 hover:bg-orange-50 px-2.5 py-1.5 rounded-lg font-medium transition hidden md:inline-flex"
-              title="ಬಳಕೆದಾರರ ವರದಿ ಮತ್ತು ಅಂಕಿಅಂಶ"
-            >
-              ಬಳಕೆದಾರರ ಮಾಹಿತಿ
-            </Link>
+            {/* Authenticated Admin quick capsule */}
+            {auth.isAdmin && (
+              <Link
+                href="/admin"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-950 text-xs font-semibold hover:bg-orange-500/25 transition shadow-2xs"
+                id="dash-nav-admin"
+                title="ನಿರ್ವಾಹಕ ಕಂಟ್ರೋಲ್ ಸೆಂಟರ್"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
+                <span className="kn hidden sm:inline">ನಿರ್ವಾಹಕ ಪ್ಯಾನೆಲ್</span>
+                <span className="kn sm:hidden">Admin</span>
+              </Link>
+            )}
 
             {currentStudent ? (
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-pink-500 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 text-white flex items-center justify-center font-bold text-xs shadow-xs">
                   {currentStudent.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="hidden lg:block text-left">
-                  <div className="text-xs font-bold text-gray-800 leading-tight">
+                  <div className="text-xs font-bold text-neutral-800 leading-tight">
                     {currentStudent.name}
                   </div>
                   <div className="text-[10px] text-emerald-600 font-medium">
-                    ಉಚಿತ ಪ್ರವೇಶ
+                    {auth.isAdmin ? 'ನಿರ್ವಾಹಕ' : 'ಉಚಿತ ಪ್ರವೇಶ'}
                   </div>
                 </div>
                 <form action="/api/auth/logout" method="POST">
-                  <button type="submit" className="text-xs text-gray-400 hover:text-red-600 ml-1">
+                  <button type="submit" className="text-xs text-neutral-400 hover:text-red-600 ml-1 font-medium">
                     ಲಾಗ್ ಔಟ್
                   </button>
                 </form>
               </div>
             ) : (
-              <Link href="/login" className="btn-outline text-xs px-3 py-1.5 hidden xs:inline-flex">
+              <Link href="/login" className="btn-notion-glass text-xs !py-1.5 !px-3.5 !rounded-full hidden xs:inline-flex">
                 ಲಾಗಿನ್
               </Link>
             )}
@@ -230,12 +236,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
         {/* Welcome banner if newly logged in */}
         {params.welcome && (
-          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-orange-500 to-pink-500 text-white flex items-center justify-between shadow-sm">
+          <div className="mb-6 p-4 rounded-2xl liquid-glass border border-orange-200/60 bg-gradient-to-r from-orange-500/15 to-pink-500/15 text-neutral-900 flex items-center justify-between shadow-sm">
             <div>
               <h3 className="font-bold text-sm">ಸ್ವಾಗತ! ನಿಮ್ಮ ಖಾತೆ ಸಕ್ರಿಯವಾಗಿದೆ.</h3>
-              <p className="text-xs text-orange-100">ಎಲ್ಲಾ ನೋಟ್ಸ್, ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆ ಮತ್ತು ವ್ಯಾಕರಣ ಸಂಪೂರ್ಣ ಉಚಿತವಾಗಿ ಲಭ್ಯವಿದೆ.</p>
+              <p className="text-xs text-neutral-600">ಎಲ್ಲಾ ನೋಟ್ಸ್, ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆ ಮತ್ತು ವ್ಯಾಕರಣ ಸಂಪೂರ್ಣ ಉಚಿತವಾಗಿ ಲಭ್ಯವಿದೆ.</p>
             </div>
-            <Link href="/dashboard" className="text-xs bg-white text-orange-700 px-3 py-1.5 rounded-full font-bold">
+            <Link href="/dashboard" className="text-xs bg-neutral-900 text-white px-3 py-1.5 rounded-full font-bold">
               ಸರಿ
             </Link>
           </div>
@@ -255,7 +261,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             <Link
               href={activeCat ? `/dashboard?cat=${activeCat}${searchMode === 'en' ? '&mode=en' : ''}` : searchMode === 'en' ? '/dashboard?mode=en' : '/dashboard'}
               id="class-filter-all"
-              className={`pill ${!activeClass ? 'pill-active' : 'pill-inactive'}`}
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                !activeClass
+                  ? 'bg-neutral-900 text-white shadow-sm'
+                  : 'liquid-glass-pill text-neutral-700 hover:text-neutral-950'
+              }`}
             >
               ಎಲ್ಲಾ ತರಗತಿಗಳು
             </Link>
@@ -264,7 +274,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 key={c.slug}
                 href={`/dashboard?class=${c.slug}${activeCat ? `&cat=${activeCat}` : ''}${searchMode === 'en' ? '&mode=en' : ''}`}
                 id={`class-filter-${c.slug}`}
-                className={`pill ${activeClass === c.slug ? 'pill-active' : 'pill-inactive'}`}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                  activeClass === c.slug
+                    ? 'bg-neutral-900 text-white shadow-sm'
+                    : 'liquid-glass-pill text-neutral-700 hover:text-neutral-950'
+                }`}
               >
                 {c.label}
               </Link>
@@ -290,20 +304,20 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   key={cat.slug}
                   href={`/dashboard?cat=${cat.slug}${activeClass ? `&class=${activeClass}` : ''}${searchMode === 'en' ? '&mode=en' : ''}`}
                   id={`cat-${cat.slug}`}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3 group ${
+                  className={`p-3.5 rounded-2xl transition-all flex items-center gap-3 group ${
                     isSelected
-                      ? 'border-orange-400 bg-orange-50/80 shadow-sm ring-2 ring-orange-200'
-                      : 'bg-white border-slate-200 hover:border-orange-300 hover:shadow-sm'
+                      ? 'border border-orange-500/80 bg-orange-500/20 shadow-md ring-2 ring-orange-400/30'
+                      : 'liquid-glass-card hover:border-orange-300/80'
                   }`}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-sm group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                  <div className="w-9 h-9 rounded-xl bg-orange-500/15 text-orange-700 border border-orange-200/50 flex items-center justify-center font-bold text-sm group-hover:bg-orange-500 group-hover:text-white transition-colors">
                     {cat.label.charAt(0)}
                   </div>
                   <div>
-                    <div className={`text-sm font-bold leading-tight ${isSelected ? 'text-orange-700' : 'text-slate-800 group-hover:text-orange-600'}`}>
+                    <div className={`text-sm font-bold leading-tight ${isSelected ? 'text-orange-950 font-extrabold' : 'text-neutral-800 group-hover:text-orange-600'}`}>
                       {cat.label}
                     </div>
-                    <div className="text-[11px] text-slate-400">{cat.sub}</div>
+                    <div className="text-[11px] text-neutral-400">{cat.sub}</div>
                   </div>
                 </Link>
               );
@@ -313,16 +327,16 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
         {/* Search transliteration mode indicator banner */}
         {rawQuery && searchMode === 'en' && transliteratedCandidates.length > 0 && (
-          <div className="mb-6 p-3.5 rounded-2xl bg-orange-50/90 border border-orange-200/80 text-xs text-orange-950 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+          <div className="mb-6 p-3.5 rounded-2xl liquid-glass border border-orange-200/80 text-xs text-orange-950 flex flex-wrap items-center justify-between gap-2 shadow-xs">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-orange-800 inline-flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                 English ಲಿಪಿ ಹುಡುಕಾಟ:
               </span>
-              <span className="font-mono bg-white px-2.5 py-0.5 rounded-lg border border-orange-200 font-medium text-neutral-800">
+              <span className="font-mono bg-white/70 backdrop-blur-md px-2.5 py-0.5 rounded-lg border border-orange-200 font-medium text-neutral-800">
                 &ldquo;{rawQuery}&rdquo;
               </span>
-              <span className="text-neutral-400">➔</span>
+              <ArrowRight className="w-3.5 h-3.5 text-orange-600 inline shrink-0" />
               <span className="font-bold text-neutral-900 kn">
                 {transliteratedCandidates.join(' / ')}
               </span>
@@ -337,7 +351,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <section>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-base font-bold text-slate-900">
+              <h2 className="text-base font-bold text-neutral-900">
                 {query
                   ? `"${query}" ಗಾಗಿ ಹುಡುಕಾಟದ ಫಲಿತಾಂಶಗಳು (${filtered.length})`
                   : activeCat
@@ -346,18 +360,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   ? `${CLASSES.find((c) => c.slug === activeClass)?.label ?? ''} ಸಂಪನ್ಮೂಲಗಳು (${filtered.length})`
                   : `ಲಭ್ಯವಿರುವ ಎಲ್ಲಾ ಸಂಪನ್ಮೂಲಗಳು (${filtered.length})`}
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-neutral-500">
                 ಯಾವುದೇ ಸಂಪನ್ಮೂಲದ ಮೇಲೆ ಕ್ಲಿಕ್ ಮಾಡಿ ಸಂಪೂರ್ಣ ವಿವರಗಳನ್ನು ಉಚಿತವಾಗಿ ಅಧ್ಯಯನ ಮಾಡಿ.
               </p>
             </div>
           </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-12 text-center">
-              <h3 className="text-base font-bold text-slate-700 mb-1">
+            <div className="rounded-3xl border border-dashed border-white/60 liquid-glass p-12 text-center">
+              <h3 className="text-base font-bold text-neutral-800 mb-1">
                 ಯಾವುದೇ ಸಂಪನ್ಮೂಲಗಳು ಕಂಡುಬಂದಿಲ್ಲ
               </h3>
-              <p className="text-xs text-slate-400 mb-4">
+              <p className="text-xs text-neutral-500 mb-4">
                 ದಯವಿಟ್ಟು ಬೇರೆ ಹುಡುಕಾಟ ಪದ ಅಥವಾ ಫಿಲ್ಟರ್ ಆಯ್ಕೆಮಾಡಿ
               </p>
               <Link href="/dashboard" className="btn-primary text-xs px-4 py-2">
@@ -369,30 +383,30 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               {filtered.map((item) => (
                 <article
                   key={item.id}
-                  className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:border-orange-300 transition-all flex flex-col justify-between group"
+                  className="liquid-glass-card rounded-2xl p-5 flex flex-col justify-between group"
                 >
                   <div>
                     {/* Badges */}
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800">
+                      <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/20 text-orange-900">
                         {item.classGrade === 'all'
                           ? 'ಎಲ್ಲಾ ತರಗತಿಗಳು'
                           : `${item.classGrade}ನೇ ತರಗತಿ`}
                       </span>
-                      <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                      <span className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider">
                         {item.category}
                       </span>
                     </div>
 
                     {/* Title */}
-                    <h3 className="font-bold text-slate-900 group-hover:text-orange-600 transition text-base leading-snug mb-2">
+                    <h3 className="font-bold text-neutral-900 group-hover:text-orange-600 transition text-base leading-snug mb-2">
                       <Link href={`/dashboard/resource/${item.slug}`}>
                         {item.title}
                       </Link>
                     </h3>
 
                     {/* Summary */}
-                    <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed mb-4">
+                    <p className="text-xs text-neutral-600 line-clamp-3 leading-relaxed mb-4">
                       {item.summary}
                     </p>
                   </div>
@@ -401,20 +415,20 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1.5 mb-4">
                       {item.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md">
+                        <span key={tag} className="text-[10px] bg-white/40 border border-white/60 text-neutral-600 px-2 py-0.5 rounded-md">
                           #{tag}
                         </span>
                       ))}
                     </div>
 
                     {/* Action buttons */}
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div className="pt-3 border-t border-white/40 flex items-center justify-between">
                       <Link
                         href={`/dashboard/resource/${item.slug}`}
                         className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
                       >
                         <span>ಓದಿ & ಅಧ್ಯಯನ ಮಾಡಿ</span>
-                        <span>→</span>
+                        <ArrowRight className="w-3.5 h-3.5 inline" />
                       </Link>
                       <Link
                         href={`/dashboard/resource/${item.slug}`}
@@ -433,15 +447,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       </div>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-6 text-center text-xs text-slate-400">
+      <footer className="bg-white/80 backdrop-blur-md border-t border-slate-200/60 py-6 text-center text-xs text-neutral-500">
         <div className="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© {new Date().getFullYear()} ಪ್ರತಿಭಾ ಕನ್ನಡ — ಉಚಿತ ಶೈಕ್ಷಣಿಕ ವೇದಿಕೆ</p>
-          <div className="flex items-center gap-4 text-slate-500">
-            <Link href="/admin" className="hover:text-orange-600">ಅಂಕಿಅಂಶ</Link>
+          <p className="kn">© {new Date().getFullYear()} ಪ್ರತಿಭಾ ಕನ್ನಡ — ಉಚಿತ ಶೈಕ್ಷಣಿಕ ವೇದಿಕೆ</p>
+          <div className="flex items-center gap-4 text-neutral-600 font-medium">
+            <Link href="/" className="hover:text-orange-600 transition">ಮುಖಪುಟ</Link>
             <span>·</span>
-            <Link href="/" className="hover:text-orange-600">ಮುಖಪುಟ</Link>
-            <span>·</span>
-            <Link href="/dashboard" className="hover:text-orange-600">ಸಂಪನ್ಮೂಲಗಳು</Link>
+            <Link href="/dashboard" className="hover:text-orange-600 transition">ಸಂಪನ್ಮೂಲಗಳು</Link>
           </div>
         </div>
       </footer>

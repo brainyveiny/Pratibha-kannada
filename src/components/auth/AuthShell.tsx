@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { SearchModeToggle } from '@/components/search/SearchModeToggle';
+import { KannadaParticleBackground } from '@/components/background/KannadaParticleBackground';
 
 interface AuthShellProps {
   activeTab: 'login' | 'register';
@@ -26,62 +27,17 @@ export function AuthShell({
   footerActionId,
 }: AuthShellProps) {
   return (
-    <div className="relative min-h-screen font-kannada bg-[#FAF9F6] text-neutral-900 overflow-x-hidden selection:bg-orange-500/20 selection:text-orange-950 flex flex-col justify-between">
+    <div className="relative min-h-screen font-kannada text-neutral-900 overflow-x-clip selection:bg-neutral-900/10 selection:text-neutral-950 flex flex-col justify-between bg-[#fafafa]">
       {/* ─────────────────────────────────────────────────────────────
-          1. NATURAL LIVE AMBIENT MESH GRADIENTS (Matches Home Page)
+          1. LIVE ANIMATED KANNADA TYPOGRAPHY CANVAS BACKGROUND
       ───────────────────────────────────────────────────────────── */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-        {/* Soft morning amber glow */}
-        <div
-          className="aurora-live-1 absolute -top-[15%] left-[10%] w-[680px] h-[680px] rounded-full blur-[100px] opacity-60"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(255, 185, 130, 0.55) 0%, rgba(254, 215, 170, 0.35) 45%, transparent 75%)',
-          }}
-        />
-
-        {/* Delicate blush dawn glow */}
-        <div
-          className="aurora-live-2 absolute top-[20%] -right-[10%] w-[720px] h-[720px] rounded-full blur-[115px] opacity-55"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(254, 205, 211, 0.50) 0%, rgba(253, 186, 116, 0.25) 45%, transparent 75%)',
-          }}
-        />
-
-        {/* Honey sunlight base */}
-        <div
-          className="aurora-live-3 absolute top-[55%] -left-[15%] w-[650px] h-[650px] rounded-full blur-[110px] opacity-45"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(254, 240, 138, 0.45) 0%, rgba(254, 215, 170, 0.25) 50%, transparent 70%)',
-          }}
-        />
-
-        {/* Subtle bottom lavender warmth */}
-        <div
-          className="aurora-live-1 absolute -bottom-[10%] right-[15%] w-[620px] h-[620px] rounded-full blur-[105px] opacity-40"
-          style={{
-            background:
-              'radial-gradient(circle, rgba(243, 232, 255, 0.40) 0%, rgba(254, 205, 211, 0.20) 50%, transparent 75%)',
-          }}
-        />
-
-        {/* Ultra-subtle paper grain texture overlay for tactile Notion feel */}
-        <div
-          className="absolute inset-0 opacity-[0.025]"
-          style={{
-            backgroundImage: `radial-gradient(#000 1px, transparent 1px)`,
-            backgroundSize: '24px 24px',
-          }}
-        />
-      </div>
+      <KannadaParticleBackground />
 
       {/* ─────────────────────────────────────────────────────────────
-          2. FLOATING IPHONE GLASS NAVBAR (Apple Dynamic Island / Notion style)
+          2. FLOATING IPHONE GLASS NAVBAR (Neutral iOS Liquid Glass)
       ───────────────────────────────────────────────────────────── */}
-      <header className="sticky top-3 sm:top-4 z-50 px-3 sm:px-6">
-        <div className="mx-auto max-w-5xl iphone-glass rounded-full px-3.5 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between transition-all">
+      <header className="sticky top-3 sm:top-4 z-50 px-3 sm:px-6 pointer-events-none">
+        <div className="mx-auto max-w-5xl liquid-glass-navbar rounded-full px-3.5 sm:px-5 py-2.5 sm:py-3 flex items-center justify-between transition-all pointer-events-auto">
           <Link href="/" className="flex items-center gap-1.5 sm:gap-2 group shrink-0">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white font-extrabold text-xs sm:text-sm shadow-sm group-hover:scale-105 transition-transform shrink-0">
               ಪ್ರ

@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { verifySessionToken } from '@/lib/security';
 import AdminContentManager from './AdminContentManager';
 import { SearchModeToggle } from '@/components/search/SearchModeToggle';
+import { ShieldCheck, Home, BookOpen, LogOut } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'ನಿರ್ವಾಹಕ ಕಂಟೆಂಟ್ ಕಂಟ್ರೋಲ್ ಸೆಂಟರ್ (Admin CMS) | Pratibha Kannada',
@@ -46,27 +47,59 @@ export default async function AdminPage() {
   const stats = getUserStats();
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-xl font-bold kn text-orange-600">
-              ಪ್ರತಿಭಾ ಕನ್ನಡ
+    <div className="min-h-screen text-neutral-900 font-kannada relative">
+      {/* Top Liquid Glass Navbar */}
+      <header className="sticky top-0 z-40 liquid-glass border-b border-white/60">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-500 flex items-center justify-center text-white font-extrabold text-sm shadow-xs group-hover:scale-105 transition-transform">
+                ಪ್ರ
+              </div>
+              <span className="text-lg font-bold text-neutral-900 tracking-tight kn group-hover:text-orange-600 transition-colors">
+                ಪ್ರತಿಭಾ ಕನ್ನಡ
+              </span>
             </Link>
-            <span className="text-xs bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded font-mono font-medium">
-              Admin CMS
+            <span className="inline-flex items-center gap-1 text-xs bg-orange-500/15 text-orange-950 border border-orange-500/25 px-2.5 py-0.5 rounded-full font-semibold shadow-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
+              <span>Admin Console</span>
             </span>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
+
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <SearchModeToggle />
+
+            {/* Seamless navigation to public site */}
+            <Link
+              href="/"
+              className="text-xs text-neutral-700 hover:text-neutral-950 liquid-glass-pill px-3 py-1.5 rounded-xl transition font-medium hidden md:inline-flex items-center gap-1.5"
+              title="ಸಾರ್ವಜನಿಕ ಮುಖಪುಟಕ್ಕೆ ಹೋಗಿ"
+            >
+              <Home className="w-3.5 h-3.5 text-neutral-500" />
+              <span>ಮುಖಪುಟ</span>
+            </Link>
+
             <Link
               href="/dashboard"
-              className="text-xs text-slate-600 hover:text-slate-900 border border-slate-200 px-3.5 py-2 rounded-xl transition hover:bg-slate-50 kn font-medium hidden sm:flex items-center gap-1.5"
+              className="text-xs text-neutral-800 hover:text-orange-700 liquid-glass-pill px-3 py-1.5 rounded-xl transition font-medium flex items-center gap-1.5"
+              title="ವಿದ್ಯಾರ್ಥಿ ಕಲಿಕಾ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹೋಗಿ"
             >
-              <span>ವಿದ್ಯಾರ್ಥಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್</span>
-              <span>→</span>
+              <BookOpen className="w-3.5 h-3.5 text-orange-600" />
+              <span className="hidden sm:inline">ವಿದ್ಯಾರ್ಥಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್</span>
+              <span className="sm:hidden">ಡ್ಯಾಶ್‌ಬೋರ್ಡ್</span>
             </Link>
+
+            {/* Direct Logout */}
+            <form action="/api/auth/logout" method="POST">
+              <button
+                type="submit"
+                className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200/60 px-3 py-1.5 rounded-xl transition font-medium flex items-center gap-1"
+                title="ನಿರ್ವಾಹಕ ಸೆಷನ್‌ನಿಂದ ಲಾಗ್ ಔಟ್ ಮಾಡಿ"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">ಲಾಗ್ ಔಟ್</span>
+              </button>
+            </form>
           </div>
         </div>
       </header>

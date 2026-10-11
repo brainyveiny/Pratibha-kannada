@@ -50,6 +50,9 @@ module.exports = {
         'blob-3': 'blob-move 15s ease-in-out infinite reverse',
         'fade-up': 'fade-up 0.5s ease-out both',
       },
+      boxShadow: {
+        xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+      },
     },
   },
   plugins: [],

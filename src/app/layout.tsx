@@ -19,7 +19,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="kn">
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased bg-[#fafafa] text-neutral-900 selection:bg-neutral-900/10 selection:text-neutral-950">
+        {children}
+      </body>
     </html>
   );
 }
