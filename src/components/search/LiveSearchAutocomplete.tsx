@@ -217,13 +217,13 @@ export function LiveSearchAutocomplete({
               onKeyDown={handleKeyDown}
               placeholder={resolvedPlaceholder}
               autoFocus={autoFocus}
-              className="w-full bg-transparent text-sm sm:text-base text-neutral-900 placeholder:text-neutral-400 outline-none kn font-medium"
+              className="w-full bg-transparent text-base text-neutral-900 placeholder:text-neutral-400 outline-none kn font-medium"
               aria-label="ಸಂಪನ್ಮೂಲ ಹುಡುಕಿ"
             />
             <button
               type="submit"
               id={buttonId}
-              className="btn-notion-dark text-xs sm:text-sm !py-2 !px-5 !rounded-xl shrink-0"
+              className="btn-notion-dark text-xs sm:text-sm !py-2.5 !px-5 !rounded-xl shrink-0 min-h-[44px] flex items-center justify-center"
             >
               ಹುಡುಕಿ
             </button>
@@ -264,13 +264,13 @@ export function LiveSearchAutocomplete({
               onKeyDown={handleKeyDown}
               placeholder={resolvedPlaceholder}
               autoFocus={autoFocus}
-              className="input pl-9 pr-24 py-2 text-sm rounded-full w-full"
+              className="input pl-9 pr-24 py-2.5 text-base sm:text-sm rounded-full w-full min-h-[44px]"
               aria-label="ಸಂಪನ್ಮೂಲ ಹುಡುಕಿ"
             />
             <button
               type="submit"
               id={buttonId}
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 btn-primary text-xs py-1 px-3.5 rounded-full"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 btn-primary text-xs py-1.5 px-3.5 rounded-full min-h-[34px] flex items-center justify-center"
             >
               ಹುಡುಕಿ
             </button>
@@ -297,7 +297,7 @@ export function LiveSearchAutocomplete({
                   aria-selected={isSelected}
                   onClick={() => handleSelectSuggestion(item)}
                   onMouseEnter={() => setSelectedIndex(index)}
-                  className={`px-4 py-3 cursor-pointer flex items-center justify-between gap-3 transition-colors min-h-[44px] ${
+                  className={`px-4 py-3 cursor-pointer flex items-center justify-between gap-3 transition-colors min-h-[48px] ${
                     isSelected ? 'bg-orange-500/15 text-orange-950 font-medium' : 'hover:bg-white/40 text-neutral-800'
                   }`}
                 >

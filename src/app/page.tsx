@@ -15,14 +15,14 @@ export const metadata: Metadata = {
 };
 
 const CATEGORIES = [
-  { label: 'ನೋಟ್ಸ್',                 sub: 'Notes & Summary',      href: '/dashboard?cat=notes',           code: 'N' },
-  { label: 'ವ್ಯಾಕರಣ',                sub: 'Grammar Guide',        href: '/dashboard?cat=grammar',         code: 'G' },
-  { label: 'ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆ',        sub: 'Model Papers',         href: '/dashboard?cat=question-papers', code: 'Q' },
-  { label: 'ಹಿಂದಿನ ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆ', sub: 'Previous Exam Papers', href: '/dashboard?cat=previous-year',   code: 'P' },
-  { label: 'ಪ್ರಶ್ನೋತ್ತರ',            sub: 'Questions & Answers',  href: '/dashboard?cat=qa',              code: 'A' },
-  { label: 'ಪ್ರಬಂಧ & ಗಾದೆ',          sub: 'Essays & Expansions',  href: '/dashboard?cat=essay',           code: 'E' },
-  { label: 'ಕವಿ ಪರಿಚಯ',             sub: 'Authors & Poets',      href: '/dashboard?cat=poets',           code: 'K' },
-  { label: 'ಅಭ್ಯಾಸ ಪರೀಕ್ಷೆ',         sub: 'Practice Worksheets',  href: '/dashboard?cat=practice',        code: 'W' },
+  { label: 'ನೋಟ್ಸ್',                 sub: 'Notes & Summary',      description: 'ಪಾಠಗಳ ಸಮಗ್ರ ವಿವರಣೆ ಮತ್ತು ಸಾರಾಂಶ', href: '/dashboard?cat=notes',           code: 'N' },
+  { label: 'ವ್ಯಾಕರಣ',                sub: 'Grammar Guide',        description: 'ಸಂಧಿ, ಸಮಾಸ, ವಿಭಕ್ತಿ ಮತ್ತು ಸೂತ್ರಗಳು', href: '/dashboard?cat=grammar',         code: 'G' },
+  { label: 'ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆ',        sub: 'Model Papers',         description: 'ಪರೀಕ್ಷಾ ತಯಾರಿಗಾಗಿ ಮಾದರಿ ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆಗಳು', href: '/dashboard?cat=question-papers', code: 'Q' },
+  { label: 'ಹಿಂದಿನ ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆ', sub: 'Previous Exam Papers', description: 'ವಾರ್ಷಿಕ ಪರೀಕ್ಷೆಗಳ ಮೂಲ ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆಗಳು', href: '/dashboard?cat=previous-year',   code: 'P' },
+  { label: 'ಪ್ರಶ್ನೋತ್ತರ',            sub: 'Questions & Answers',  description: 'ಪ್ರಮುಖ ಪ್ರಶ್ನೆಗಳು ಮತ್ತು ನಿಖರ ಉತ್ತರಗಳು', href: '/dashboard?cat=qa',              code: 'A' },
+  { label: 'ಪ್ರಬಂಧ & ಗಾದೆ',          sub: 'Essays & Expansions',  description: 'ಕನ್ನಡ ಪ್ರಬಂಧಗಳು ಹಾಗೂ ಗಾದೆ ಮಾತುಗಳು', href: '/dashboard?cat=essay',           code: 'E' },
+  { label: 'ಕವಿ ಪರಿಚಯ',             sub: 'Authors & Poets',      description: 'ಪ್ರಸಿದ್ಧ ಕವಿ-ಸಾಹಿತಿಗಳ ಜೀವನ ಮತ್ತು ಕೃತಿಗಳು', href: '/dashboard?cat=poets',           code: 'K' },
+  { label: 'ಅಭ್ಯಾಸ ಪರೀಕ್ಷೆ',         sub: 'Practice Worksheets',  description: 'ಸ್ವಯಂ ಮೌಲ್ಯಮಾಪನಕ್ಕಾಗಿ ಅಭ್ಯಾಸ ಹಾಳೆಗಳು', href: '/dashboard?cat=practice',        code: 'W' },
 ];
 
 import { SUPPORTED_CLASSES } from '@/data/classes';
@@ -118,27 +118,27 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────────────────────
           3. HERO SECTION (Notion Minimalist + iPhone Spotlight Glass)
       ───────────────────────────────────────────────────────────── */}
-      <section className="relative z-10 pt-16 sm:pt-24 pb-16 px-4 sm:px-6">
+      <section className="relative z-10 pt-12 sm:pt-20 lg:pt-24 pb-12 sm:pb-16 px-4 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
 
           {/* Notion-style badge pill */}
-          <div className="fade-up inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full iphone-glass-pill text-xs font-semibold text-neutral-700 mb-6 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>ಕನ್ನಡ ಕಲಿಕೆಗೆ ಉಚಿತ ಡಿಜಿಟಲ್ ವೇದಿಕೆ</span>
+          <div className="fade-up inline-flex items-center gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full iphone-glass-pill text-xs sm:text-sm font-semibold text-neutral-800 mb-5 sm:mb-6 shadow-xs max-w-full">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+            <span className="truncate">ಕನ್ನಡ ಕಲಿಕೆಗೆ ಉಚಿತ ಡಿಜಿಟಲ್ ವೇದಿಕೆ</span>
             <span className="text-neutral-400">·</span>
-            <span className="text-orange-700">100% Free</span>
+            <span className="text-orange-700 font-bold shrink-0">100% Free</span>
           </div>
 
-          {/* Master Title */}
-          <h1 className="fade-up fade-up-1 text-4xl sm:text-6xl font-extrabold text-neutral-950 tracking-tight leading-[1.15] mb-5 kn">
+          {/* Master Title (Target: 28-34px on mobile, 48-60px desktop) */}
+          <h1 className="fade-up fade-up-1 text-3xl sm:text-5xl lg:text-6xl font-extrabold text-neutral-950 tracking-tight leading-[1.18] mb-4 sm:mb-5 kn">
             ಪ್ರತಿಭಾ ಕನ್ನಡ
           </h1>
 
-          {/* Subtitle */}
-          <p className="fade-up fade-up-2 text-lg sm:text-2xl font-semibold text-neutral-800 leading-snug mb-3 kn">
+          {/* Subtitle (Target: 20-24px on mobile) */}
+          <p className="fade-up fade-up-2 text-xl sm:text-2xl font-bold text-neutral-900 leading-snug mb-3 kn">
             ಕನ್ನಡ ಸಾಹಿತ್ಯ, ವ್ಯಾಕರಣ ಮತ್ತು ಪರೀಕ್ಷಾ ಸಂಪನ್ಮೂಲಗಳ ಡಿಜಿಟಲ್ ಭಂಡಾರ
           </p>
-          <p className="fade-up fade-up-2 text-sm sm:text-base text-neutral-500 max-w-xl mx-auto mb-8 font-normal">
+          <p className="fade-up fade-up-2 text-base sm:text-lg text-neutral-600 max-w-xl mx-auto mb-7 sm:mb-8 font-normal leading-relaxed kn">
             8ನೇ ತರಗತಿಯಿಂದ 10ನೇ ತರಗತಿ ಹಾಗೂ ಪಿಯುಸಿ (1st & 2nd PUC) ವಿದ್ಯಾರ್ಥಿಗಳಿಗಾಗಿ ಸಂಪೂರ್ಣ ಉಚಿತ ನೋಟ್ಸ್, ಪ್ರಶ್ನೋತ್ತರ ಮತ್ತು ವ್ಯಾಕರಣ ಮಾರ್ಗದರ್ಶಿ.
           </p>
 
@@ -150,14 +150,14 @@ export default async function HomePage() {
             <Link
               href="/register"
               id="cta-get-started"
-              className="btn-notion-dark w-full sm:w-auto text-sm sm:text-base !py-3 !px-7 !rounded-full shadow-md hover:shadow-lg"
+              className="btn-notion-dark w-full sm:w-auto text-base !py-3.5 !px-8 !rounded-full shadow-md hover:shadow-lg min-h-[48px]"
             >
               ಉಚಿತವಾಗಿ ಪ್ರಾರಂಭಿಸಿ
             </Link>
             <Link
               href="/dashboard"
               id="cta-browse"
-              className="btn-notion-glass w-full sm:w-auto text-sm sm:text-base !py-3 !px-7 !rounded-full"
+              className="btn-notion-glass w-full sm:w-auto text-base !py-3.5 !px-8 !rounded-full min-h-[48px]"
             >
               ಸಂಪನ್ಮೂಲಗಳನ್ನು ಅನ್ವೇಷಿಸಿ →
             </Link>
@@ -169,58 +169,61 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────────────────────
           4. IPHONE FROSTED STATS BAR (Live platform proof)
       ───────────────────────────────────────────────────────────── */}
-      <section className="relative z-10 px-4 sm:px-6 mb-16">
-        <div className="mx-auto max-w-4xl iphone-glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-          <div className="border-r border-slate-200/50 last:border-none">
-            <div className="text-xl sm:text-2xl font-extrabold text-neutral-900 font-mono">100%</div>
-            <div className="text-xs font-medium text-neutral-500 mt-0.5 kn">ಸಂಪೂರ್ಣ ಉಚಿತ</div>
+      <section className="relative z-10 px-4 sm:px-6 mb-12 sm:mb-16">
+        <div className="mx-auto max-w-4xl iphone-glass rounded-2xl sm:rounded-3xl p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-center border border-white/60">
+          <div className="border-r border-slate-200/50">
+            <div className="text-2xl sm:text-3xl font-extrabold text-neutral-950 font-mono">100%</div>
+            <div className="text-xs sm:text-sm font-semibold text-neutral-600 mt-1 kn">ಸಂಪೂರ್ಣ ಉಚಿತ</div>
           </div>
-          <div className="border-r border-slate-200/50 last:border-none">
-            <div className="text-xl sm:text-2xl font-extrabold text-neutral-900 font-mono">26+</div>
-            <div className="text-xs font-medium text-neutral-500 mt-0.5 kn">ಸಂಪನ್ಮೂಲಗಳು</div>
+          <div className="border-r border-slate-200/50">
+            <div className="text-2xl sm:text-3xl font-extrabold text-neutral-950 font-mono">26+</div>
+            <div className="text-xs sm:text-sm font-semibold text-neutral-600 mt-1 kn">ಸಂಪನ್ಮೂಲಗಳು</div>
           </div>
-          <div className="border-r border-slate-200/50 last:border-none">
-            <div className="text-xl sm:text-2xl font-extrabold text-neutral-900 font-mono">8–PUC</div>
-            <div className="text-xs font-medium text-neutral-500 mt-0.5 kn">ತರಗತಿ & ಪಿಯುಸಿ</div>
+          <div className="border-r border-slate-200/50">
+            <div className="text-2xl sm:text-3xl font-extrabold text-neutral-950 font-mono">8–PUC</div>
+            <div className="text-xs sm:text-sm font-semibold text-neutral-600 mt-1 kn">ತರಗತಿ & ಪಿಯುಸಿ</div>
           </div>
           <div>
-            <div className="text-xl sm:text-2xl font-extrabold text-neutral-900 font-mono">2–3</div>
-            <div className="text-xs font-medium text-neutral-500 mt-0.5 kn">ಕ್ಲಿಕ್‌ನಲ್ಲಿ ಶೋಧನೆ</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-neutral-950 font-mono">2–3</div>
+            <div className="text-xs sm:text-sm font-semibold text-neutral-600 mt-1 kn">ಕ್ಲಿಕ್‌ನಲ್ಲಿ ಶೋಧನೆ</div>
           </div>
         </div>
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          5. CLASSES SECTION (Apple iOS Segmented Control Feel)
+          5. CLASSES SECTION (Accurate numbers: 8, 9, 10, 11, 12)
       ───────────────────────────────────────────────────────────── */}
       <section className="relative z-10 py-10 px-4 sm:px-6">
         <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-6">
-            <span className="text-xs font-bold uppercase tracking-widest text-neutral-400">
+          <div className="text-center mb-6 sm:mb-8">
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-neutral-500">
               ತರಗತಿ ಆಯ್ಕೆಮಾಡಿ
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mt-1 kn">
+            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-950 mt-1.5 kn">
               ನಿಮ್ಮ ತರಗತಿಗೆ ತಕ್ಕ ಅಧ್ಯಯನ ಸಾಮಗ್ರಿಗಳು
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
             {SUPPORTED_CLASSES.map((c) => (
               <Link
                 key={c.href}
                 href={c.href}
                 id={`class-${c.slug}`}
-                className="iphone-glass-card rounded-2xl p-4 flex flex-col items-center text-center group cursor-pointer"
+                className="iphone-glass-card rounded-2xl p-4 sm:p-5 flex flex-col items-center text-center group cursor-pointer border border-white/60 hover:border-orange-200/80 transition-all min-h-[145px] justify-between"
               >
-                <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-700 flex items-center justify-center font-bold text-sm mb-2 group-hover:bg-neutral-900 group-hover:text-white transition-colors duration-200">
-                  {c.slug.startsWith('puc') ? 'ಪಿ' : c.slug}
+                {/* Numeric Class Badge (Target: 22-28px font size, unambiguous numbers) */}
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-orange-500/10 text-orange-800 border border-orange-500/20 flex items-center justify-center font-black font-mono text-xl sm:text-2xl mb-2 group-hover:bg-neutral-900 group-hover:text-white transition-colors duration-200">
+                  {c.displayNumber}
                 </div>
-                <span className="text-sm font-bold text-neutral-900 group-hover:text-orange-700 kn">
-                  {c.labelKn}
-                </span>
-                <span className="text-[11px] text-neutral-400 mt-0.5 font-medium">
-                  {c.subEn}
-                </span>
+                <div>
+                  <span className="text-base sm:text-lg font-bold text-neutral-950 group-hover:text-orange-700 kn leading-tight block">
+                    {c.labelKn}
+                  </span>
+                  <span className="text-xs sm:text-sm text-neutral-500 mt-1 font-medium block">
+                    {c.subEn}
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
@@ -228,49 +231,56 @@ export default async function HomePage() {
       </section>
 
       {/* ─────────────────────────────────────────────────────────────
-          6. CATEGORIES SECTION (Notion Bento Grid + iPhone Glass Cards)
+          6. CATEGORIES SECTION (Section 5 Redesign: Clean, boxy, structured)
       ───────────────────────────────────────────────────────────── */}
       <section className="relative z-10 py-12 px-4 sm:px-6">
         <div className="mx-auto max-w-5xl">
           <div className="text-center mb-8">
-            <span className="text-xs font-bold uppercase tracking-widest text-neutral-400">
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-neutral-500">
               ವಿಷಯ ಪ್ರಕಾರಗಳು
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mt-1 kn">
+            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-950 mt-1.5 kn">
               ಸಂಪೂರ್ಣ ಶೈಕ್ಷಣಿಕ ವರ್ಗೀಕರಣ
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-500 mt-1">
-              ನೋಟ್ಸ್, ವ್ಯಾಕರಣ, ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆಗಳು ಹಾಗೂ ಕವಿ ಪರಿಚಯ
+            <p className="text-sm sm:text-base text-neutral-600 mt-1.5 kn max-w-xl mx-auto">
+              ನೋಟ್ಸ್, ವ್ಯಾಕರಣ, ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆಗಳು ಹಾಗೂ ಕವಿ ಪರಿಚಯ — ಎಲ್ಲವೂ ಒಂದೇ ವೇದಿಕೆಯಲ್ಲಿ
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Clean, slightly boxy card grid: 1-col on mobile, 2-col on sm, 4-col on lg */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.href}
                 href={cat.href}
                 id={`cat-${cat.sub.toLowerCase().replace(/\s+/g, '-')}`}
-                className="iphone-glass-card rounded-3xl p-5 flex flex-col justify-between group cursor-pointer"
+                className="iphone-glass-card rounded-2xl p-5 flex flex-col justify-between group cursor-pointer border border-white/60 hover:border-orange-200/80 transition-all min-h-[160px]"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="w-9 h-9 rounded-xl bg-neutral-900/5 text-neutral-800 flex items-center justify-center font-mono font-bold text-xs group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-800 border border-orange-500/20 flex items-center justify-center font-mono font-bold text-sm group-hover:bg-neutral-900 group-hover:text-white transition-colors">
                       {cat.code}
                     </div>
-                    <span className="text-neutral-400 text-xs group-hover:translate-x-1 group-hover:text-orange-600 transition-all">
-                      →
+                    <span className="text-xs font-semibold text-neutral-500 font-mono tracking-wider">
+                      {cat.sub}
                     </span>
                   </div>
-                  <h3 className="text-base font-bold text-neutral-900 group-hover:text-orange-700 kn mb-1 leading-snug">
+                  <h3 className="text-lg sm:text-xl font-bold text-neutral-950 group-hover:text-orange-700 kn mb-1 leading-snug">
                     {cat.label}
                   </h3>
-                  <p className="text-xs text-neutral-500 font-medium leading-relaxed">
-                    {cat.sub}
+                  <p className="text-sm text-neutral-600 font-normal leading-relaxed kn">
+                    {cat.description}
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-slate-200/50 flex items-center justify-between text-[11px] text-neutral-400">
-                  <span>ಮುಕ್ತ ಪ್ರವೇಶ</span>
-                  <span className="text-orange-600 font-semibold group-hover:underline">ಓದಿ</span>
+                <div className="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs text-neutral-500">
+                  <span className="font-semibold text-emerald-700 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span>
+                    ಮುಕ್ತ ಪ್ರವೇಶ
+                  </span>
+                  <span className="text-orange-600 font-bold group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                    <span>ಓದಿ</span>
+                    <span>→</span>
+                  </span>
                 </div>
               </Link>
             ))}
@@ -281,41 +291,41 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────────────────────
           7. NOTION-STYLE FEATURE SHOWCASE (Clean, live & distraction-free)
       ───────────────────────────────────────────────────────────── */}
-      <section className="relative z-10 py-14 px-4 sm:px-6">
+      <section className="relative z-10 py-12 sm:py-16 px-4 sm:px-6">
         <div className="mx-auto max-w-5xl">
-          <div className="max-w-2xl mx-auto text-center mb-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-orange-700">
+          <div className="max-w-2xl mx-auto text-center mb-8 sm:mb-10">
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-orange-700">
               ಸುಲಭ ಕಲಿಕಾ ತತ್ವ
             </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-950 mt-1 kn">
+            <h2 className="text-2xl sm:text-3xl font-bold text-neutral-950 mt-1.5 kn">
               ಕೇವಲ ಮೂರು ಹಂತಗಳಲ್ಲಿ ನಿಮ್ಮ ಅಧ್ಯಯನ
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-500 mt-2">
+            <p className="text-sm sm:text-base text-neutral-600 mt-2 kn">
               ಅನಗತ್ಯ ಜಾಹೀರಾತುಗಳು ಅಥವಾ ಅಡೆತಡೆಗಳಿಲ್ಲದೆ ನೇರವಾಗಿ ವಿಷಯವನ್ನು ಅಧ್ಯಯನ ಮಾಡಿ.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="iphone-glass-card rounded-2xl p-6 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div className="iphone-glass-card rounded-2xl p-6 text-left border border-white/60">
               <div className="text-xs font-mono font-bold text-orange-600 mb-2">01 / DISCOVER</div>
-              <h3 className="text-lg font-bold text-neutral-900 mb-2 kn">ಹುಡುಕಿ</h3>
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed kn">
+              <h3 className="text-xl font-bold text-neutral-950 mb-2 kn">ಹುಡುಕಿ</h3>
+              <p className="text-sm sm:text-base text-neutral-600 leading-relaxed kn">
                 ಯಾವುದೇ ಸಂಧಿ, ಸಮಾಸ, ಪಾಠ ಅಥವಾ ಹಿಂದಿನ ವರ್ಷದ ಪತ್ರಿಕೆಯನ್ನು ಕೆಲವೇ ಅಕ್ಷರಗಳಲ್ಲಿ ಸರ್ಚ್ ಮಾಡಿ.
               </p>
             </div>
 
-            <div className="iphone-glass-card rounded-2xl p-6 text-left">
+            <div className="iphone-glass-card rounded-2xl p-6 text-left border border-white/60">
               <div className="text-xs font-mono font-bold text-orange-600 mb-2">02 / OPEN</div>
-              <h3 className="text-lg font-bold text-neutral-900 mb-2 kn">ತೆರೆಯಿರಿ</h3>
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed kn">
+              <h3 className="text-xl font-bold text-neutral-950 mb-2 kn">ತೆರೆಯಿರಿ</h3>
+              <p className="text-sm sm:text-base text-neutral-600 leading-relaxed kn">
                 ಒಂದೇ ಕ್ಲಿಕ್‌ನಲ್ಲಿ ಸುಲಭವಾಗಿ ಓದಲು ಸಿದ್ಧವಾದ ಅಕ್ಷರ ರೂಪದ ಸಾರಾಂಶ ಹಾಗೂ ಪ್ರಶ್ನೋತ್ತರ ವೀಕ್ಷಿಸಿ.
               </p>
             </div>
 
-            <div className="iphone-glass-card rounded-2xl p-6 text-left">
+            <div className="iphone-glass-card rounded-2xl p-6 text-left border border-white/60">
               <div className="text-xs font-mono font-bold text-orange-600 mb-2">03 / STUDY</div>
-              <h3 className="text-lg font-bold text-neutral-900 mb-2 kn">ಅಧ್ಯಯನ ಮಾಡಿ</h3>
-              <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed kn">
+              <h3 className="text-xl font-bold text-neutral-950 mb-2 kn">ಅಧ್ಯಯನ ಮಾಡಿ</h3>
+              <p className="text-sm sm:text-base text-neutral-600 leading-relaxed kn">
                 ಪರೀಕ್ಷಾ ತಯಾರಿಗಾಗಿ ವಿಶ್ವಾಸಾರ್ಹ ಶಿಕ್ಷಕರು ರೂಪಿಸಿದ ಪ್ರಶ್ನೆ ಪತ್ರಿಕೆಗಳನ್ನು ಉಚಿತವಾಗಿ ಅಭ್ಯಾಸ ಮಾಡಿ.
               </p>
             </div>
@@ -326,25 +336,25 @@ export default async function HomePage() {
       {/* ─────────────────────────────────────────────────────────────
           8. FINAL CALL TO ACTION (Glassy Card)
       ───────────────────────────────────────────────────────────── */}
-      <section className="relative z-10 py-16 px-4 sm:px-6 text-center">
-        <div className="mx-auto max-w-xl iphone-glass rounded-3xl p-8 sm:p-12 shadow-lg">
+      <section className="relative z-10 py-14 sm:py-16 px-4 sm:px-6 text-center">
+        <div className="mx-auto max-w-xl iphone-glass rounded-3xl p-6 sm:p-12 shadow-lg border border-white/80">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-950 mb-3 kn">
             ಇಂದೇ ನಿಮ್ಮ ಕಲಿಕೆ ಆರಂಭಿಸಿ
           </h2>
-          <p className="text-sm text-neutral-600 mb-6 kn max-w-md mx-auto">
+          <p className="text-base text-neutral-600 mb-6 kn max-w-md mx-auto leading-relaxed">
             ಯಾವುದೇ ಶುಲ್ಕವಿಲ್ಲದೆ, 8-10ನೇ ತರಗತಿ ಹಾಗೂ ಪಿಯುಸಿ ಕನ್ನಡ ಅಧ್ಯಯನ ಸಾಮಗ್ರಿಗಳನ್ನು ಉಚಿತವಾಗಿ ಪಡೆದುಕೊಳ್ಳಿ.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/register"
               id="cta-footer-register"
-              className="btn-notion-dark text-sm sm:text-base !py-3 !px-8 !rounded-full w-full sm:w-auto"
+              className="btn-notion-dark text-base !py-3.5 !px-8 !rounded-full w-full sm:w-auto min-h-[48px]"
             >
               ಉಚಿತ ಖಾತೆ ತೆರೆಯಿರಿ
             </Link>
             <Link
               href="/dashboard"
-              className="btn-notion-glass text-sm sm:text-base !py-3 !px-8 !rounded-full w-full sm:w-auto"
+              className="btn-notion-glass text-base !py-3.5 !px-8 !rounded-full w-full sm:w-auto min-h-[48px]"
             >
               ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ನೋಡಿ
             </Link>

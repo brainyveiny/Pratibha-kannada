@@ -13,6 +13,7 @@
 
 export interface SupportedClass {
   slug: '10' | '9' | '8' | 'puc-1' | 'puc-2';
+  displayNumber: '10' | '9' | '8' | '11' | '12';
   labelKn: string;
   labelEn: string;
   subKn: string;
@@ -23,6 +24,7 @@ export interface SupportedClass {
 export const SUPPORTED_CLASSES: SupportedClass[] = [
   {
     slug: '10',
+    displayNumber: '10',
     labelKn: '10ನೇ ತರಗತಿ',
     labelEn: 'Class 10 (SSLC)',
     subKn: 'ಎಸ್.ಎಸ್.ಎಲ್.ಸಿ ಬೋರ್ಡ್',
@@ -31,6 +33,7 @@ export const SUPPORTED_CLASSES: SupportedClass[] = [
   },
   {
     slug: '9',
+    displayNumber: '9',
     labelKn: '9ನೇ ತರಗತಿ',
     labelEn: 'Class 9',
     subKn: 'ಪ್ರೌಢಶಾಲೆ',
@@ -39,6 +42,7 @@ export const SUPPORTED_CLASSES: SupportedClass[] = [
   },
   {
     slug: '8',
+    displayNumber: '8',
     labelKn: '8ನೇ ತರಗತಿ',
     labelEn: 'Class 8',
     subKn: 'ಪ್ರೌಢಶಾಲೆ',
@@ -47,6 +51,7 @@ export const SUPPORTED_CLASSES: SupportedClass[] = [
   },
   {
     slug: 'puc-1',
+    displayNumber: '11',
     labelKn: '1ನೇ ಪಿಯುಸಿ',
     labelEn: '1st PUC',
     subKn: 'ಪದವಿ ಪೂರ್ವ',
@@ -55,6 +60,7 @@ export const SUPPORTED_CLASSES: SupportedClass[] = [
   },
   {
     slug: 'puc-2',
+    displayNumber: '12',
     labelKn: '2ನೇ ಪಿಯುಸಿ',
     labelEn: '2nd PUC',
     subKn: 'ಪದವಿ ಪೂರ್ವ',
@@ -62,6 +68,25 @@ export const SUPPORTED_CLASSES: SupportedClass[] = [
     href: '/dashboard?class=puc-2',
   },
 ];
+
+export function getClassDisplayNumber(grade: string): string {
+  switch (grade) {
+    case '10':
+      return '10';
+    case '9':
+      return '9';
+    case '8':
+      return '8';
+    case 'puc-1':
+      return '11';
+    case 'puc-2':
+      return '12';
+    case 'puc':
+      return 'PUC';
+    default:
+      return grade;
+  }
+}
 
 export const VALID_GRADE_SLUGS = ['10', '9', '8', 'puc-1', 'puc-2', 'puc'] as const;
 export type ValidGradeSlug = (typeof VALID_GRADE_SLUGS)[number];

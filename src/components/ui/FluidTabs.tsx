@@ -81,9 +81,9 @@ export function FluidTabs({
   };
 
   const sizeClasses = {
-    sm: 'text-xs py-1.5 px-3 min-h-[34px]',
-    md: 'text-xs sm:text-sm py-2 px-3.5 sm:px-4 min-h-[40px]',
-    lg: 'text-sm sm:text-base py-2.5 px-5 min-h-[46px]',
+    sm: 'text-xs sm:text-sm py-2 px-3 min-h-[38px]',
+    md: 'text-xs sm:text-sm py-2 px-3.5 sm:px-4 min-h-[44px]',
+    lg: 'text-sm sm:text-base py-2.5 px-5 min-h-[48px]',
   };
 
   return (

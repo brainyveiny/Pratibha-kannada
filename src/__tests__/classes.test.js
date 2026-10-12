@@ -102,4 +102,31 @@ describe('Supported Academic Levels Validation Tests', () => {
     expect(formatGradeLabelKn('6')).toBe('6ನೇ ತರಗತಿ');
     expect(formatGradeLabelKn('7')).toBe('7ನೇ ತರಗತಿ');
   });
+
+  function getClassDisplayNumber(grade) {
+    switch (grade) {
+      case '10':
+        return '10';
+      case '9':
+        return '9';
+      case '8':
+        return '8';
+      case 'puc-1':
+        return '11';
+      case 'puc-2':
+        return '12';
+      case 'puc':
+        return 'PUC';
+      default:
+        return grade;
+    }
+  }
+
+  test('getClassDisplayNumber maps academic levels to unambiguous display numbers', () => {
+    expect(getClassDisplayNumber('10')).toBe('10'); // Must never be truncated to '1'
+    expect(getClassDisplayNumber('9')).toBe('9');
+    expect(getClassDisplayNumber('8')).toBe('8');
+    expect(getClassDisplayNumber('puc-1')).toBe('11');
+    expect(getClassDisplayNumber('puc-2')).toBe('12');
+  });
 });

@@ -96,10 +96,10 @@ export function AuthShell({
               <span className="text-orange-700 font-bold shrink-0">100% Free</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-950 tracking-tight kn mb-2">
+            <h1 className="text-[26px] sm:text-3xl font-extrabold text-neutral-950 tracking-tight kn mb-2">
               {title}
             </h1>
-            <p className="text-xs sm:text-sm text-neutral-600 max-w-sm mx-auto kn font-normal leading-relaxed">
+            <p className="text-sm sm:text-base text-neutral-600 max-w-sm mx-auto kn font-normal leading-relaxed">
               {subtitle}
             </p>
           </div>
@@ -114,13 +114,13 @@ export function AuthShell({
                 <div className="w-full border-t border-slate-200/60" />
               </div>
               <div className="relative flex justify-center text-xs text-neutral-400">
-                <span className="bg-white/80 px-3 rounded-full text-[11px] font-medium backdrop-blur-sm">
+                <span className="bg-white/80 px-3 rounded-full text-xs font-medium backdrop-blur-sm">
                   ಅಥವಾ
                 </span>
               </div>
             </div>
 
-            <p className="text-center text-xs sm:text-sm text-neutral-600 kn">
+            <p className="text-center text-sm sm:text-base text-neutral-600 kn">
               {footerPrompt}{' '}
               <Link
                 href={footerActionHref}
